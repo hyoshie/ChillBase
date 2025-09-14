@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e3a3393ba8494663a9ec5e6b9d80177, type: 3}
+  m_Name: diamond
+  m_EditorClassIdentifier: 
+  id: diamond
+  displayName: Diamond
+  price: 10
+  shopIcon: {fileID: -7919964342103698340, guid: fbd39290a07b0479a8df99701f30842e, type: 3}
+  category: {fileID: 11400000, guid: cc1a07f925fd145b594918ebbbd75b27, type: 2}
+  visuals:
+  - slot: {fileID: 11400000, guid: 54eb1c8c45ec4467296befdca0085b9f, type: 2}
+    viewType: 0
+    sprite: {fileID: -7919964342103698340, guid: fbd39290a07b0479a8df99701f30842e, type: 3}
+    animator: {fileID: 0}
+  allowedRooms:
+  - {fileID: 11400000, guid: 08fdc445f4fbf41649eb1d711957d95c, type: 2}

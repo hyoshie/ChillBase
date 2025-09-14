@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bfbe35e5c7fb401ea7540f284bc457c, type: 3}
+  m_Name: Decor
+  m_EditorClassIdentifier: 
+  id: decor
+  displayName: Decor
+  icon: {fileID: -7919964342103698340, guid: fbd39290a07b0479a8df99701f30842e, type: 3}
+  sortOrder: 1

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e3a3393ba8494663a9ec5e6b9d80177, type: 3}
+  m_Name: usa_decoration1
+  m_EditorClassIdentifier: 
+  id: usa_decoration1
+  displayName: Decoration 1
+  price: 10
+  shopIcon: {fileID: -8211836042369950665, guid: ae7cf36ef873549a4917f674484bb80f, type: 3}
+  visuals:
+  - slot: {fileID: 11400000, guid: 2925a0400e8d04416a35e0df28b75445, type: 2}
+    viewType: 0
+    sprite: {fileID: -898224023, guid: ae7cf36ef873549a4917f674484bb80f, type: 3}
+    animator: {fileID: 0}
+  allowedRooms:
+  - {fileID: 11400000, guid: a7cbc48f73b1f412c9e8d293809da622, type: 2}

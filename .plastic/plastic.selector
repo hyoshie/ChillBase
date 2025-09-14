@@ -1,0 +1,3 @@
+rep "LofiPomodoroMobile/LofiPomodoroMobile@15669603100976@cloud"
+  path "/"
+    smartbranch "/main/github-auto-test"

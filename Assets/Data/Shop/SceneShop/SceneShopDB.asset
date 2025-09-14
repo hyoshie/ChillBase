@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3c27442670954f75b06eeadf4481ed4, type: 3}
+  m_Name: SceneShopDB
+  m_EditorClassIdentifier: 
+  rooms:
+  - {fileID: 11400000, guid: a7cbc48f73b1f412c9e8d293809da622, type: 2}
+  - {fileID: 11400000, guid: 08fdc445f4fbf41649eb1d711957d95c, type: 2}
