@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e3a3393ba8494663a9ec5e6b9d80177, type: 3}
+  m_Name: usa_notebook1
+  m_EditorClassIdentifier: 
+  id: usa_notebook1
+  displayName: Notebook 1
+  price: 10
+  shopIcon: {fileID: 3876899080843853636, guid: 3dc7cf290334c49bfb72e58fc4cace8c, type: 3}
+  visuals:
+  - slot: {fileID: 11400000, guid: fe37b2267e3694f909fcc371fa6b77f6, type: 2}
+    viewType: 0
+    sprite: {fileID: 1370016904, guid: 3dc7cf290334c49bfb72e58fc4cace8c, type: 3}
+    animator: {fileID: 0}
+  - slot: {fileID: 11400000, guid: 47939c2dcaef94ab0a88987bfca51c7c, type: 2}
+    viewType: 0
+    sprite: {fileID: -1371564140, guid: de7f223470b44446d9a8c38eeee9b83d, type: 3}
+    animator: {fileID: 0}
+  allowedRooms:
+  - {fileID: 11400000, guid: a7cbc48f73b1f412c9e8d293809da622, type: 2}
