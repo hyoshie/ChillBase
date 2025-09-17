@@ -1,6 +1,8 @@
 name: Test project
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [main, dev]
 
 jobs:
   testAllModes:
@@ -37,14 +39,14 @@ jobs:
           artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
-          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
+          # coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Test results for ${{ matrix.testMode }}
           path: ${{ steps.tests.outputs.artifactsPath }}
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Coverage results for ${{ matrix.testMode }}
-          path: ${{ steps.tests.outputs.coveragePath }}
+      # - uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: Coverage results for ${{ matrix.testMode }}
+      #     path: ${{ steps.tests.outputs.coveragePath }}
