@@ -2,9 +2,7 @@ name: Test project
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
+    branches: [main, dev]
 
 jobs:
   testAllModes:
