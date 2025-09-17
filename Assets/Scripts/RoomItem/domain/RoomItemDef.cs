@@ -1,16 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.VersionControl;
 using UnityEngine;
-
-// [System.Serializable]
-// public class RoomItemVisual
-// {
-// 	public ItemSlotDef slot; // string から SlotDef (SO) に変更
-// 	public Sprite sprite;    // そのスロットに出すスプライト
-
-// 	// 互換用のプロパティ：slot が無い時は空文字
-// 	public string SlotId => slot ? slot.id : "";
-// }
 
 public enum RoomItemViewType { Static, Animated }
 
@@ -88,6 +79,10 @@ public class RoomItemDef : ScriptableObject
 		if (visuals == null) return null;
 		return System.Array.Find(visuals, v => v != null && v.SlotId == slotId);
 	}
+
+	public bool RequiresAlwaysEquipped() =>
+		category && category.requiresAlwaysEquipped;
+
 #if UNITY_EDITOR
 	void OnValidate()
 	{

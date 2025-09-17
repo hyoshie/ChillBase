@@ -87,7 +87,7 @@ public class RoomItemShopView : MonoBehaviour
 
 		bool owned = roomItemService.IsOwned(_data.id);
 		bool equippedAll = owned && roomItemService.IsEquipped(_data);
-		bool canUnequip = owned && equippedAll && roomItemService.CanUnequip(_data); // ★ 服なら false
+		bool canUnequip = owned && equippedAll && _data.RequiresAlwaysEquipped(); // ★ 服なら false
 
 		if (!owned)
 		{
@@ -162,7 +162,7 @@ public class RoomItemShopView : MonoBehaviour
 		if (equippedAll)
 		{
 			// ★ 服など必須カテゴリは解除不可（サービスにも保険あり）
-			if (!roomItemService.CanUnequip(_data))
+			if (_data.RequiresAlwaysEquipped())
 			{
 				// 何もしない（UIではボタンは非活性になっている想定）
 				Debug.Log($"[Shop] Unequip blocked (required): {_data.id}");

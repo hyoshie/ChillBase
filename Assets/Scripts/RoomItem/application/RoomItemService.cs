@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#nullable enable
+
 /// <summary>
 /// Repository ⇄ State の仲介。装備/解除/購入のルール適用。
 /// 装備はシーン別に保存/復元（RoomStateSO.CurrentId）
@@ -139,7 +141,7 @@ public class RoomItemServiceSO : ScriptableObject
 	}
 
 	// ---- 装備（Equipped：シーン別）----
-	public string GetEquipped(string slotId)
+	public string? GetEquipped(string slotId)
 	{
 		if (string.IsNullOrEmpty(slotId)) slotId = state.DefaultSlot;
 		return state.EquippedMap.TryGetValue(slotId, out var itemId) ? itemId : null;
@@ -175,17 +177,10 @@ public class RoomItemServiceSO : ScriptableObject
 
 		// ★ ここで服解除を禁止
 		var curDef = FindItemDef(cur);
-		if (IsClothes(curDef))
-		{
-			// 服は未装備（null）にできない → 解除拒否
-			// 置き換えは Equip(...) でのみ許可（別アイテムを装備する操作）
+		if (curDef == null || curDef.RequiresAlwaysEquipped())
 			return false;
-		}
 
-		// State 更新
 		state.SetEquipped(slotId, null);
-
-		// Repository 保存（現在シーン）
 		var sceneId = roomState ? roomState.CurrentId : "default";
 		RoomItemRepository.SetEquippedMap(_eqDto, sceneId, state.EquippedMap);
 		RoomItemRepository.SaveEquippedByScene(_eqDto);
@@ -232,7 +227,11 @@ public class RoomItemServiceSO : ScriptableObject
 
 	public bool Unequip(RoomItemDef item)
 	{
-		if (item == null) return false;
+		if (item == null || item.RequiresAlwaysEquipped
+		())
+		{
+			return false;
+		}
 
 		bool changed = false;
 		foreach (var slot in ResolveSlots(item))
@@ -310,7 +309,7 @@ public class RoomItemServiceSO : ScriptableObject
 		};
 	}
 
-	RoomDef FindRoomDef(string sceneId)
+	RoomDef? FindRoomDef(string sceneId)
 	{
 		if (roomDatabase == null || string.IsNullOrEmpty(sceneId)) return null;
 		if (roomDatabase.rooms == null) return null;
@@ -322,27 +321,19 @@ public class RoomItemServiceSO : ScriptableObject
 		return null;
 	}
 
-	RoomItemDef FindItemDef(string itemId)
+	RoomItemDef? FindItemDef(string itemId)
 	{
-		if (string.IsNullOrEmpty(itemId) || shopCatalog == null || shopCatalog.items == null) return null;
+		if (string.IsNullOrEmpty(itemId) || shopCatalog == null || shopCatalog.items == null)
+		{
+			Debug.LogWarning("FindItemDef: property is not set.");
+			return null;
+		}
 		for (int i = 0; i < shopCatalog.items.Length; i++)
 		{
 			var def = shopCatalog.items[i];
 			if (def && def.id == itemId) return def;
 		}
+		Debug.LogWarning("FindItemDef: Not Found");
 		return null;
-	}
-
-	bool IsClothes(RoomItemDef def)
-	{
-		if (!def || def.category == null) return false;
-		var id = (def.category.id ?? "").Trim().ToLowerInvariant();
-		return id == (clothesCategoryId ?? "").Trim().ToLowerInvariant();
-	}
-	public bool CanUnequip(RoomItemDef item)
-	{
-		if (item == null) return false;
-		// 服は解除不可、それ以外は解除可
-		return !IsClothes(item);
 	}
 }
