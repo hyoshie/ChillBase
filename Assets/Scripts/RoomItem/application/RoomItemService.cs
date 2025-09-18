@@ -10,7 +10,7 @@ using UnityEngine;
 /// 保存タイミング：購入・装備・解除で即保存
 /// </summary>
 [CreateAssetMenu(menuName = "Game/RoomItemService", fileName = "RoomItemService")]
-public class RoomItemServiceSO : ScriptableObject
+public partial class RoomItemServiceSO : ScriptableObject
 {
 	[Header("States")]
 	[SerializeField] RoomItemStateSO state = null!;     // 現在シーンの装備ビュー＋Owned

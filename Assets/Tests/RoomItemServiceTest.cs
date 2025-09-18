@@ -10,6 +10,7 @@ public class RoomItemServiceTests
 	RoomItemDef clothesItem;
 	RoomItemCategoryDef clothesCat;
 	RoomItemShopCatalog catalog;
+	RoomDatabase roomDatabase;
 
 	[SetUp]
 	public void Setup()
@@ -20,15 +21,6 @@ public class RoomItemServiceTests
 		roomState = ScriptableObject.CreateInstance<RoomStateSO>();
 		service = ScriptableObject.CreateInstance<RoomItemServiceSO>();
 		LogAssert.ignoreFailingMessages = false;
-
-		// フィールド割り当て（privateなので反射）
-		typeof(RoomItemServiceSO)
-				.GetField("state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-				.SetValue(service, state);
-		typeof(RoomItemServiceSO)
-				.GetField("roomState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-				.SetValue(service, roomState);
-
 		// ルームID初期化
 		roomState.Set("TestRoom");
 
@@ -44,10 +36,9 @@ public class RoomItemServiceTests
 		// ---- ★ここが追加：サービス用のカタログを設定 ----
 		catalog = ScriptableObject.CreateInstance<RoomItemShopCatalog>();
 		catalog.items = new[] { clothesItem };
-		typeof(RoomItemServiceSO)
-				.GetField("shopCatalog", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-				.SetValue(service, catalog);
-		// ---------------------------------------------
+		roomDatabase = ScriptableObject.CreateInstance<RoomDatabase>();
+
+		service.InjectForTests(state, roomState, roomDatabase, catalog);
 
 		// 所持 & 装備状態を直接設定
 		state.SetOwned(new System.Collections.Generic.HashSet<string> { clothesItem.id });
@@ -63,6 +54,7 @@ public class RoomItemServiceTests
 		Object.DestroyImmediate(clothesItem);
 		Object.DestroyImmediate(clothesCat);
 		Object.DestroyImmediate(catalog);
+		Object.DestroyImmediate(roomDatabase);
 	}
 
 	[Test]
