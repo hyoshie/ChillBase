@@ -67,4 +67,36 @@ public class RoomItemServiceTests
 		Assert.IsFalse(result, "服カテゴリは Unequip が成功してはいけない");
 		Assert.AreEqual(clothesItem.id, state.EquippedMap["avatar/body"], "服カテゴリは装備が外れず維持される");
 	}
+	[Test]
+	public void Clothes_CanSwitchToAnotherClothes_ByEquipReplacement()
+	{
+		// Arrange: 服Bを用意して、所持 & カタログに追加
+		var clothesItemB = ScriptableObject.CreateInstance<RoomItemDef>();
+		clothesItemB.id = "shirt002";
+		clothesItemB.category = clothesCat; // 同じ「clothes」カテゴリ
+
+		// カタログ更新（A,B 両方を引けるように）
+		catalog.items = new[] { clothesItem, clothesItemB };
+
+		// 所持に追加（A は Setup で所持済み・装備済み）
+		var owned = new System.Collections.Generic.HashSet<string>(state.Owned) { clothesItemB.id };
+		state.SetOwned(owned);
+
+		// Sanity: いまは A が装備されているはず
+		Assert.AreEqual(clothesItem.id, service.GetEquipped("avatar/body"));
+
+		// Act: 服Bに装備切り替え（Unequip は呼ばず、Equip で置き換える）
+		bool changed = service.Equip(clothesItemB);
+
+		// Assert: 置き換え成功（true が返り、スロットの中身が B になる）
+		Assert.IsTrue(changed, "Clothes → Clothes の置き換え Equip は成功すべき");
+		Assert.AreEqual(clothesItemB.id, service.GetEquipped("avatar/body"), "装備は shirt002 に置き換わる");
+
+		// 追加確認：B は装備扱い / A は非装備
+		Assert.IsTrue(service.IsEquipped(clothesItemB));
+		Assert.IsFalse(service.IsEquipped(clothesItem));
+
+		// 後片付け
+		Object.DestroyImmediate(clothesItemB);
+	}
 }
