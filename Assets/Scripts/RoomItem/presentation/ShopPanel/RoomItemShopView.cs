@@ -87,7 +87,7 @@ public class RoomItemShopView : MonoBehaviour
 
 		bool owned = roomItemService.IsOwned(_data.id);
 		bool equippedAll = owned && roomItemService.IsEquipped(_data);
-		bool canUnequip = owned && equippedAll && _data.RequiresAlwaysEquipped(); // ★ 服なら false
+		bool canUnequip = owned && equippedAll && !_data.RequiresAlwaysEquipped(); // ★ 服なら false
 
 		if (!owned)
 		{
