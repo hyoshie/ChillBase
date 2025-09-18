@@ -1,9 +1,13 @@
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+// using System; // IDisposable が必要なら
 
 public class RoomItemServiceTests
 {
+	// ★ InMemory ストアのスコープ（Setupで入替、TearDownで復帰）
+	System.IDisposable _storeScope;
+
 	RoomItemServiceSO service;
 	RoomItemStateSO state;
 	RoomStateSO roomState;
@@ -15,16 +19,20 @@ public class RoomItemServiceTests
 	[SetUp]
 	public void Setup()
 	{
-		// ScriptableObject生成
+		// 1) まずストアを InMemory に（テスト間を完全分離）
+		_storeScope = Storage.PushInMemoryScope("TEST_RoomItemService_");
+
+		// 2) ScriptableObject 生成
 		LogAssert.ignoreFailingMessages = true;
 		state = ScriptableObject.CreateInstance<RoomItemStateSO>();
 		roomState = ScriptableObject.CreateInstance<RoomStateSO>();
 		service = ScriptableObject.CreateInstance<RoomItemServiceSO>();
 		LogAssert.ignoreFailingMessages = false;
-		// ルームID初期化
+
+		// 3) ルームID初期化
 		roomState.Set("TestRoom");
 
-		// 服カテゴリ & アイテム
+		// 4) 服カテゴリ & アイテム
 		clothesCat = ScriptableObject.CreateInstance<RoomItemCategoryDef>();
 		clothesCat.id = "clothes";
 		clothesCat.requiresAlwaysEquipped = true;
@@ -33,14 +41,18 @@ public class RoomItemServiceTests
 		clothesItem.id = "shirt001";
 		clothesItem.category = clothesCat;
 
-		// ---- ★ここが追加：サービス用のカタログを設定 ----
+		// 5) サービス用カタログ/DB
 		catalog = ScriptableObject.CreateInstance<RoomItemShopCatalog>();
 		catalog.items = new[] { clothesItem };
 		roomDatabase = ScriptableObject.CreateInstance<RoomDatabase>();
 
+		// 6) 依存注入
 		service.InjectForTests(state, roomState, roomDatabase, catalog);
 
-		// 所持 & 装備状態を直接設定
+		// 7) Repository DTO を初期化（InMemoryから空読み込み）
+		service.ReloadAllFromStorage();
+
+		// 8) 所持 & 装備を直接セット（テストの初期状態）
 		state.SetOwned(new System.Collections.Generic.HashSet<string> { clothesItem.id });
 		state.SetEquipped("avatar/body", clothesItem.id);
 	}
@@ -48,6 +60,9 @@ public class RoomItemServiceTests
 	[TearDown]
 	public void Teardown()
 	{
+		// ストア復帰（InMemoryを破棄）
+		_storeScope?.Dispose();
+
 		Object.DestroyImmediate(service);
 		Object.DestroyImmediate(state);
 		Object.DestroyImmediate(roomState);
@@ -67,6 +82,7 @@ public class RoomItemServiceTests
 		Assert.IsFalse(result, "服カテゴリは Unequip が成功してはいけない");
 		Assert.AreEqual(clothesItem.id, state.EquippedMap["avatar/body"], "服カテゴリは装備が外れず維持される");
 	}
+
 	[Test]
 	public void Clothes_CanSwitchToAnotherClothes_ByEquipReplacement()
 	{
