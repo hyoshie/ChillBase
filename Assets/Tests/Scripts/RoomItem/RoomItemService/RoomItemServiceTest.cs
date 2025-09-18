@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -33,18 +34,13 @@ public class RoomItemServiceTests
 		roomState.Set("TestRoom");
 
 		// 4) 服カテゴリ & アイテム
-		clothesCat = ScriptableObject.CreateInstance<RoomItemCategoryDef>();
-		clothesCat.id = "clothes";
-		clothesCat.requiresAlwaysEquipped = true;
+		clothesCat = RoomItemCategoryDef.Create(id: "clothes", requiresAlwaysEquipped: true);
+		clothesItem = RoomItemDef.Create(id: "shirt001", category: clothesCat);
 
-		clothesItem = ScriptableObject.CreateInstance<RoomItemDef>();
-		clothesItem.id = "shirt001";
-		clothesItem.category = clothesCat;
 
 		// 5) サービス用カタログ/DB
-		catalog = ScriptableObject.CreateInstance<RoomItemShopCatalog>();
-		catalog.items = new[] { clothesItem };
-		roomDatabase = ScriptableObject.CreateInstance<RoomDatabase>();
+		catalog = RoomItemShopCatalog.Create(defs: new[] { clothesItem });
+		roomDatabase = RoomDatabase.Create();
 
 		// 6) 依存注入
 		service.InjectForTests(state, roomState, roomDatabase, catalog);
@@ -87,15 +83,13 @@ public class RoomItemServiceTests
 	public void Clothes_CanSwitchToAnotherClothes_ByEquipReplacement()
 	{
 		// Arrange: 服Bを用意して、所持 & カタログに追加
-		var clothesItemB = ScriptableObject.CreateInstance<RoomItemDef>();
-		clothesItemB.id = "shirt002";
-		clothesItemB.category = clothesCat; // 同じ「clothes」カテゴリ
+		var clothesItemB = RoomItemDef.Create(id: "shirt002", category: clothesCat);
 
 		// カタログ更新（A,B 両方を引けるように）
 		catalog.items = new[] { clothesItem, clothesItemB };
 
 		// 所持に追加（A は Setup で所持済み・装備済み）
-		var owned = new System.Collections.Generic.HashSet<string>(state.Owned) { clothesItemB.id };
+		var owned = new HashSet<string>(state.Owned) { clothesItemB.id };
 		state.SetOwned(owned);
 
 		// Sanity: いまは A が装備されているはず
@@ -115,4 +109,101 @@ public class RoomItemServiceTests
 		// 後片付け
 		Object.DestroyImmediate(clothesItemB);
 	}
+
+	// [Test]
+	// public void Service_FirstEnter_AppliesDefaults_ThenNotOverride()
+	// {
+
+	// 	// テスト用シーンID（カタログ/設定の default* が定義されている想定）
+	// 	// const string sceneX = "scene_test_defaults";
+	// 	string sceneX = RoomConstants.DefaultRoomId;
+	// 	roomState.Set(sceneX);
+
+
+	// 	// Act (1): 初回ロード -----------------------------------------------
+	// 	service.ReloadAllFromStorage(); // 初回入室相当
+	// 	Debug.Log($"reload");
+	// 	foreach (var owned in state.Owned)
+	// 	{
+	// 		Debug.Log($"owendId:{owned}");
+	// 	}
+
+	// 	// Assert (1): デフォルトが適用される
+	// 	// defaultOwned が Owned に含まれる / defaultEquipped が反映される
+	// 	var defaults = service.ResolveInitialState(sceneX, new HashSet<string>(new List<string>()), new Dictionary<string, string>()); // { ownedIds, equippedMap } を返す想定
+	// 	Debug.Log($"reslove");
+	// 	foreach (var owned in state.Owned)
+	// 	{
+	// 		Debug.Log($"owendId:{owned}");
+	// 	}
+	// 	foreach (var id in defaults.owned)
+	// 	{
+	// 		Debug.Log($"id: {id}");
+	// 		Assert.IsTrue(service.IsOwned(id),
+	// 			$"初回ロード時、defaultOwned の {id} は Owned に含まれるべき");
+	// 	}
+	// 	foreach (var kv in defaults.equipped) // kv.Key: slot, kv.Value: id
+	// 	{
+	// 		Assert.AreEqual(kv.Value, service.GetEquipped(kv.Key),
+	// 			$"初回ロード時、スロット {kv.Key} は {kv.Value} が装備されるべき");
+	// 	}
+
+	// 	// ユーザー操作: デフォルトを一部変更して保存される状態を作る
+	// 	// 例: 別の服アイテムを作って Equip（服は「解除禁止」仕様なので置換で変更）
+	// 	// 例: 別の服アイテムを作って Equip（服は「解除禁止」仕様なので置換で変更）
+	// 	var userChosen = ScriptableObject.CreateInstance<RoomItemDef>();
+	// 	userChosen.id = "user_choice_shirtX";
+	// 	userChosen.displayName = "User Choice Shirt X";
+	// 	userChosen.category = clothesCat; // 服カテゴリ
+
+	// 	var slot = ScriptableObject.CreateInstance<RoomItemSlotDef>();
+	// 	slot.id = "sample_slot";
+	// 	// Visual を追加
+	// 	var visual = new RoomItemVisual
+	// 	{
+	// 		slot = slot,
+	// 		viewType = RoomItemViewType.Static, // 静止画タイプ
+	// 		sprite = null,                      // 必要ならテスト用の Sprite を割り当て
+	// 		animator = null
+	// 	};
+	// 	userChosen.visuals = new[] { visual };
+	// 	Debug.LogWarning($"before assert: {state.Owned.Count}");
+
+
+	// 	// 所有 → 装備（装備時に保存が呼ばれる想定）
+	// 	Assert.IsTrue(service.TryAdd(userChosen.id),
+	// 		"ユーザー選択アイテムを Owned に追加できるはず");
+	// 	Assert.IsTrue(service.Equip(userChosen),
+	// 		"ユーザー選択アイテムを装備できるはず");
+	// 	// var changedOwnedSnapshot = state.Owned;
+	// 	// var changedEquippedSnapshot = state.EquippedMap;
+
+	// 	// // // Act (2): 2回目以降のロード（保存あり） ----------------------------
+	// 	// service.ReloadAllFromStorage();
+	// 	// Debug.Log($"snap:{changedOwnedSnapshot.Count}");
+	// 	// Debug.Log($"snap:{changedEquippedSnapshot.Count}");
+
+	// 	// Assert (2): ユーザーの保存内容が優先され、デフォルトで上書きされない
+	// 	// ＝ 直前のスナップショットと同一であること
+	// 	// CollectionAssert.AreEquivalent(
+	// 	// 	changedOwnedSnapshot,
+	// 	// 	state.Owned,
+	// 	// 	"2回目以降は Owned がデフォルトで上書きされてはならない"
+	// 	// );
+	// 	// var afterEquipped = state.EquippedMap;
+	// 	// Assert.AreEqual(
+	// 	// 	changedEquippedSnapshot.Count, afterEquipped.Count,
+	// 	// 	"2回目以降は EquippedMap のスロット数が変わらないはず"
+	// 	// );
+	// 	// foreach (var kv in changedEquippedSnapshot)
+	// 	// {
+	// 	// 	Assert.IsTrue(afterEquipped.TryGetValue(kv.Key, out var id),
+	// 	// 		$"2回目以降、スロット {kv.Key} は保持されるべき");
+	// 	// 	Assert.AreEqual(kv.Value, id,
+	// 	// 		$"2回目以降、スロット {kv.Key} はユーザー保存の {kv.Value} のまま");
+	// 	// }
+
+	// 	// // // Cleanup ------------------------------------------------------------
+	// 	if (userChosen) Object.DestroyImmediate(userChosen);
+	// }
 }

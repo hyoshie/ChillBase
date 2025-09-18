@@ -259,7 +259,7 @@ public class RoomItemServiceSO : ScriptableObject
 	}
 
 	// ========== ここから：デフォルト適用の純粋ロジック ==========
-	struct InitResolveResult
+	public struct InitResolveResult
 	{
 		public HashSet<string> owned;
 		public Dictionary<string, string> equipped;
@@ -267,7 +267,7 @@ public class RoomItemServiceSO : ScriptableObject
 		public bool saveEquipped;
 	}
 
-	InitResolveResult ResolveInitialState(
+	public InitResolveResult ResolveInitialState(
 		string sceneId,
 		HashSet<string> ownedIn,
 		IDictionary<string, string> savedEquippedOrNull)

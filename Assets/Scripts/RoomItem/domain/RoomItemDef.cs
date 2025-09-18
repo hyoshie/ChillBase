@@ -94,4 +94,25 @@ public class RoomItemDef : ScriptableObject
 		}
 	}
 #endif
+#if UNITY_INCLUDE_TESTS
+	public static RoomItemDef Create(
+			string id,
+			RoomItemCategoryDef category = null,
+			int price = 0,
+			IEnumerable<RoomDef> allowedRooms = null,
+			RoomItemVisual[] visuals = null,
+			string displayName = null,
+			Sprite shopIcon = null)
+	{
+		var so = ScriptableObject.CreateInstance<RoomItemDef>();
+		so.id = id;
+		so.category = category;
+		so.price = price;
+		so.displayName = displayName ?? id;
+		so.shopIcon = shopIcon;
+		so.visuals = visuals ?? System.Array.Empty<RoomItemVisual>();
+		so.allowedRooms = allowedRooms != null ? new List<RoomDef>(allowedRooms) : new List<RoomDef>();
+		return so;
+	}
+#endif
 }
