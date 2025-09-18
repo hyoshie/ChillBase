@@ -13,23 +13,26 @@ using UnityEngine;
 public class RoomItemServiceSO : ScriptableObject
 {
 	[Header("States")]
-	[SerializeField] RoomItemStateSO state;     // 現在シーンの装備ビュー＋Owned
+	[SerializeField] RoomItemStateSO state = null!;     // 現在シーンの装備ビュー＋Owned
 	public RoomItemStateSO State => state; // 読み取り専用で公開
 																				 // これ消して移行したい。とりあえず
-	[SerializeField] RoomStateSO roomState;     // 現在シーンIDの単一ソース
+	[SerializeField] RoomStateSO roomState = null!;     // 現在シーンIDの単一ソース
 
 	// ★追加：RoomDef からデフォルト装備を参照するため
-	[SerializeField] RoomDatabase roomDatabase;
+	[SerializeField] RoomDatabase roomDatabase = null!;
 	// 服カテゴリー判定のために、全アイテムを引けるカタログを割り当てる
-	[SerializeField] RoomItemShopCatalog shopCatalog; // items: RoomItemDef[] を持つ想定
-	static readonly string clothesCategoryId = "clothes"; // 服カテゴリID（必要に応じて変更）
+	[SerializeField] RoomItemShopCatalog shopCatalog = null!; // items: RoomItemDef[] を持つ想定
 
 	// stateless Repository のDTO（起動中キャッシュはService側で保持）
-	RoomItemRepository.OwnedDto _ownedDto;
-	RoomItemRepository.EqBySceneDto _eqDto;
+	RoomItemRepository.OwnedDto _ownedDto = null!;
+	RoomItemRepository.EqBySceneDto _eqDto = null!;
 
 	void OnEnable()
 	{
+		if (!state || !roomDatabase || !shopCatalog)
+		{
+			Debug.LogError($"{nameof(RoomItemServiceSO)}: Serialized refs are not set.");
+		}
 		if (roomState != null)
 		{
 			roomState.OnChanged -= HandleRoomChanged;

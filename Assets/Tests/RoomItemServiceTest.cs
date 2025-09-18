@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 public class RoomItemServiceTests
 {
@@ -14,9 +15,11 @@ public class RoomItemServiceTests
 	public void Setup()
 	{
 		// ScriptableObject生成
+		LogAssert.ignoreFailingMessages = true;
 		state = ScriptableObject.CreateInstance<RoomItemStateSO>();
 		roomState = ScriptableObject.CreateInstance<RoomStateSO>();
 		service = ScriptableObject.CreateInstance<RoomItemServiceSO>();
+		LogAssert.ignoreFailingMessages = false;
 
 		// フィールド割り当て（privateなので反射）
 		typeof(RoomItemServiceSO)
