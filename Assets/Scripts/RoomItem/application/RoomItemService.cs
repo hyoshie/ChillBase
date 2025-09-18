@@ -10,7 +10,7 @@ using UnityEngine;
 /// 保存タイミング：購入・装備・解除で即保存
 /// </summary>
 [CreateAssetMenu(menuName = "Game/RoomItemService", fileName = "RoomItemService")]
-public partial class RoomItemServiceSO : ScriptableObject
+public class RoomItemServiceSO : ScriptableObject
 {
 	[Header("States")]
 	[SerializeField] RoomItemStateSO state = null!;     // 現在シーンの装備ビュー＋Owned
@@ -339,4 +339,18 @@ public partial class RoomItemServiceSO : ScriptableObject
 		Debug.LogWarning("FindItemDef: Not Found");
 		return null;
 	}
+#if UNITY_INCLUDE_TESTS
+	// テスト時だけ使える注入用フック
+	public void InjectForTests(
+			RoomItemStateSO s,
+			RoomStateSO rs,
+			RoomDatabase db,
+			RoomItemShopCatalog cat)
+	{
+		state = s;
+		roomState = rs;
+		roomDatabase = db;
+		shopCatalog = cat;
+	}
+#endif
 }

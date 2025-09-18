@@ -9186,7 +9186,7 @@ MonoBehaviour:
     controller: {fileID: 858554448}
   staticViewPrefab: {fileID: 6798400901052367348, guid: baf65d8bd591244f4a63d7f835a9a550, type: 3}
   animViewPrefab: {fileID: 2086480414896072085, guid: 4a8b3f92ecbba4e08aca735f01d91dfb, type: 3}
-  roomItemService: {fileID: 11400000, guid: a76004c2d410f45119b74ba0562b567a, type: 2}
+  roomItemService: {fileID: 11400000, guid: dc6ffd73b1742426d9bacaf1bb213727, type: 2}
   roomItemState: {fileID: 11400000, guid: 7d4d9748306104206a99cb4f66276236, type: 2}
 --- !u!1 &1597410221
 GameObject:
@@ -9296,7 +9296,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006cc88be6d47416d88ee45768bf84b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomItemService: {fileID: 11400000, guid: a76004c2d410f45119b74ba0562b567a, type: 2}
+  roomItemService: {fileID: 11400000, guid: dc6ffd73b1742426d9bacaf1bb213727, type: 2}
   defaultCoins: 100
 --- !u!4 &1600847586
 Transform:
@@ -11663,7 +11663,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9d2abe1606144f2b895edc597e2a07e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  service: {fileID: 11400000, guid: a76004c2d410f45119b74ba0562b567a, type: 2}
+  service: {fileID: 11400000, guid: dc6ffd73b1742426d9bacaf1bb213727, type: 2}
 --- !u!1 &2002608132
 GameObject:
   m_ObjectHideFlags: 0
