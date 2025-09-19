@@ -1,0 +1,50 @@
+default_platform(:ios)
+
+platform :ios do
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      key_content: ENV["APPSTORE_P8"],
+      is_key_content_base64: false
+    )
+
+    match(
+      type: "appstore",
+      api_key: api_key,
+      git_url: "https://github.com/" + ENV["MATCH_REPOSITORY"],
+      git_basic_authorization: ENV["GH_PAT"],
+      readonly: true
+    )
+
+    build_app(
+      project: "build/iOS/Unity-iPhone.xcodeproj",
+      scheme: "Unity-iPhone",
+      export_method: "app-store"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  # 👇 ここから新しく追加する
+  desc "Create certs & profiles to MATCH_REPOSITORY (one-time)"
+  lane :setup_certs do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      key_content: ENV["APPSTORE_P8"],
+      is_key_content_base64: false
+    )
+
+    match(
+      type: "appstore",
+      api_key: api_key,
+      git_url: "https://github.com/#{ENV['MATCH_REPOSITORY']}",
+      git_basic_authorization: ENV["GH_PAT"],
+      readonly: false   # ← 証明書を新規作成して保存
+    )
+  end
+end
