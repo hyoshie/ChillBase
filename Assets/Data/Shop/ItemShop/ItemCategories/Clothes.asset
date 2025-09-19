@@ -15,4 +15,5 @@ MonoBehaviour:
   id: clothes
   displayName: Clothes
   icon: {fileID: 6342947903265577956, guid: 546b7596b7f174a8eaed054d6205798e, type: 3}
+  requiresAlwaysEquipped: 1
   sortOrder: 0

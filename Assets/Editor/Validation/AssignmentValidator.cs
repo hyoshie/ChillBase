@@ -174,7 +174,12 @@ public static class AssignmentValidator
 	static List<Issue> ValidateSceneMonoBehaviours()
 	{
 		var list = new List<Issue>();
-		var behaviours = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+		// var behaviours = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+		// 非アクティブを含めてシーン上の MB をすべて取得
+		var behaviours = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(
+				FindObjectsInactive.Include,
+				FindObjectsSortMode.None
+		).Where(mb => mb != null && mb.gameObject.scene.IsValid()); // Prefabアセット等を除外
 
 		foreach (var mb in behaviours)
 		{
