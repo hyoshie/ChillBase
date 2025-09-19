@@ -2,6 +2,9 @@ default_platform(:ios)
 
 platform :ios do
   lane :beta do
+    # CI向けのKeychain設定（任意だけどおすすめ）
+    setup_ci
+
     api_key = app_store_connect_api_key(
       key_id: ENV["APPSTORE_KEY_ID"],
       issuer_id: ENV["APPSTORE_ISSUER_ID"],
@@ -18,16 +21,43 @@ platform :ios do
     match(
       type: "appstore",
       api_key: api_key,
-      git_url: authed_git_url,   # ← 認証付きURL
-      git_branch: "main",        # ← デフォルトmaster対策
-      readonly: true             # ← 読み取り専用（通常の配布時はこちら）
+      git_url: authed_git_url,
+      git_branch: "main",
+      readonly: true
     )
 
-    build_app(
-      project: "build/iOS/Unity-iPhone.xcodeproj",
-      scheme: "Unity-iPhone",
-      export_method: "app-store"
-    )
+    # ---- ここから自動検出 ----
+    # build/ 以下から .xcworkspace or .xcodeproj を探す（どちらでもOK）
+    ws = Dir['build/**/*.xcworkspace'].first
+    pj = Dir['build/**/*.xcodeproj'].first
+    UI.user_error!("Xcode project/workspace not found under build/") if ws.nil? && pj.nil?
+
+    # スキーム名を推測（見つからなければ Unity-iPhone を既定に）
+    base   = File.basename((ws || pj), File.extname(ws || pj))
+    scheme = (base && base.size > 0) ? base : "Unity-iPhone"
+
+    # 同じく xcodeproj を見つけられたらビルド番号も自動で +1（失敗しても続行）
+    begin
+      xcodeproj_path = pj || Dir['build/**/*.xcodeproj'].first
+      increment_build_number(xcodeproj: xcodeproj_path) if xcodeproj_path
+    rescue
+      UI.important("increment_build_number skipped")
+    end
+    # ---- 自動検出 ここまで ----
+
+    if ws
+      build_app(
+        workspace: ws,
+        scheme: scheme,
+        export_method: "app-store"
+      )
+    else
+      build_app(
+        project: pj,
+        scheme: scheme,
+        export_method: "app-store"
+      )
+    end
 
     upload_to_testflight(
       api_key: api_key,
@@ -55,7 +85,7 @@ platform :ios do
       api_key: api_key,
       git_url: authed_git_url,
       git_branch: "main",
-      readonly: false             # ← 作成＆保存（初回だけこれ）
+      readonly: false   # ← 作成＆保存（初回だけ）
     )
   end
 end

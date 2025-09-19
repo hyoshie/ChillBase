@@ -3,60 +3,74 @@ name: Build project
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   buildForAllSupportedPlatforms:
-    name: Build for ${{ matrix.targetPlatform }}
+    name: Build for ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        targetPlatform:
-          # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
-          # - StandaloneWindows # Build a Windows standalone.
-          # - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          # - StandaloneLinux64 # Build a Linux 64-bit standalone.
-          - iOS # Build an iOS player.
-          - Android # Build an Android .apk standalone app.
-          # - WebGL # WebGL.
+        include:
+          - name: iOS Release
+            targetPlatform: iOS
+            buildProfile: 'Assets/Settings/Build Profiles/iOS Release.asset'       # ←必要なら実パスに変更
+          - name: Android Release
+            targetPlatform: Android
+            buildProfile: 'Assets/Settings/Build Profiles/Android Release.asset'   # ←必要なら実パスに変更
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
+
       - uses: actions/cache@v3
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
+
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
-      - uses: game-ci/unity-builder@v4
+
+      # Build Profile 指定（iOS/Android 共通）
+      - name: Unity Builder (Build Profile)
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-      - uses: actions/upload-artifact@v4
+          buildProfile:  ${{ matrix.buildProfile }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
 
-# ▼ ここから追加：iOS を TestFlight に送る macOS ジョブ
+  # ▼ iOS を TestFlight にアップロードする macOS ジョブ
   upload_ios_testflight:
     needs: buildForAllSupportedPlatforms
     runs-on: macos-14
-
     steps:
       - uses: actions/checkout@v4
 
-      # Ubuntu ジョブが上げた iOS アーティファクトを取得
       - name: Download iOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: Build-iOS            # ← 上の upload-artifact の name と一致
-          path: build/iOS            # ← Fastfile の project パスに合わせる
+          name: Build-iOS
+          # 出力先を固定せず build/ 直下に展開（プロファイルでフォルダ名が変わっても拾えるように）
+          path: build
+
+      # 展開結果を確認（トラブル時の診断用）
+      - name: Show extracted iOS artifact tree
+        run: |
+          echo "PWD: $(pwd)"
+          ls -laR build || true
 
       - uses: ruby/setup-ruby@v1
         with:
