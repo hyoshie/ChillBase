@@ -444,7 +444,7 @@ MonoBehaviour:
   priceText: {fileID: 2920919556064342989}
   actionButton: {fileID: 7110486368633017475}
   roomState: {fileID: 11400000, guid: cd63c42e5564342ad97e507fce9c3125, type: 2}
-  roomItemService: {fileID: 11400000, guid: a76004c2d410f45119b74ba0562b567a, type: 2}
+  roomItemService: {fileID: 11400000, guid: dc6ffd73b1742426d9bacaf1bb213727, type: 2}
 --- !u!1 &8479241923556249029
 GameObject:
   m_ObjectHideFlags: 0

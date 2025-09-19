@@ -1,0 +1,91 @@
+default_platform(:ios)
+
+platform :ios do
+  lane :beta do
+    # CI向けのKeychain設定（任意だけどおすすめ）
+    setup_ci
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      key_content: ENV["APPSTORE_P8"],
+      is_key_content_base64: false
+    )
+
+    # 認証付きURLを組み立て（GH_PAT を使う）
+    actor = ENV['GITHUB_ACTOR']      # Actions が自動で入れる実行ユーザー名
+    pat   = ENV['GH_PAT']            # Secrets の GH_PAT
+    repo  = ENV['MATCH_REPOSITORY']  # 例: yshima42/ios-certs
+    authed_git_url = "https://#{actor}:#{pat}@github.com/#{repo}.git"
+
+    match(
+      type: "appstore",
+      api_key: api_key,
+      git_url: authed_git_url,
+      git_branch: "main",
+      readonly: true
+    )
+
+    # ---- ここから自動検出 ----
+    # build/ 以下から .xcworkspace or .xcodeproj を探す（どちらでもOK）
+    ws = Dir['build/**/*.xcworkspace'].first
+    pj = Dir['build/**/*.xcodeproj'].first
+    UI.user_error!("Xcode project/workspace not found under build/") if ws.nil? && pj.nil?
+
+    # スキーム名を推測（見つからなければ Unity-iPhone を既定に）
+    base   = File.basename((ws || pj), File.extname(ws || pj))
+    scheme = (base && base.size > 0) ? base : "Unity-iPhone"
+
+    # 同じく xcodeproj を見つけられたらビルド番号も自動で +1（失敗しても続行）
+    begin
+      xcodeproj_path = pj || Dir['build/**/*.xcodeproj'].first
+      increment_build_number(xcodeproj: xcodeproj_path) if xcodeproj_path
+    rescue
+      UI.important("increment_build_number skipped")
+    end
+    # ---- 自動検出 ここまで ----
+
+    if ws
+      build_app(
+        workspace: ws,
+        scheme: scheme,
+        export_method: "app-store"
+      )
+    else
+      build_app(
+        project: pj,
+        scheme: scheme,
+        export_method: "app-store"
+      )
+    end
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  # 👇 初回の証明書作成・保存用（one-time）
+  desc "Create certs & profiles to MATCH_REPOSITORY (one-time)"
+  lane :setup_certs do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPSTORE_KEY_ID"],
+      issuer_id: ENV["APPSTORE_ISSUER_ID"],
+      key_content: ENV["APPSTORE_P8"],
+      is_key_content_base64: false
+    )
+
+    actor = ENV['GITHUB_ACTOR']
+    pat   = ENV['GH_PAT']
+    repo  = ENV['MATCH_REPOSITORY']
+    authed_git_url = "https://#{actor}:#{pat}@github.com/#{repo}.git"
+
+    match(
+      type: "appstore",
+      api_key: api_key,
+      git_url: authed_git_url,
+      git_branch: "main",
+      readonly: false   # ← 作成＆保存（初回だけ）
+    )
+  end
+end

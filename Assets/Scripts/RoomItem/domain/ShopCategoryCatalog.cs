@@ -4,8 +4,17 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Shop/CategoryCatalog", fileName = "ShopCategoryCatalog")]
 public class ShopCategoryCatalog : ScriptableObject
 {
-	[Tooltip("ショップで使用するカテゴリ一覧（表示順は基本 sortOrder → displayName で決めます）")]
-	public RoomItemCategoryDef[] categories;
+    [Tooltip("ショップで使用するカテゴリ一覧（表示順は基本 sortOrder → displayName で決めます）")]
+    public RoomItemCategoryDef[] categories;
+
+#if UNITY_INCLUDE_TESTS
+    public static ShopCategoryCatalog Create(params RoomItemCategoryDef[] cats)
+    {
+        var so = ScriptableObject.CreateInstance<ShopCategoryCatalog>();
+        so.categories = cats ?? new RoomItemCategoryDef[0];
+        return so;
+    }
+#endif
 
 #if UNITY_EDITOR
     // 重複IDやnull混入の軽い検証（エディタのみ）

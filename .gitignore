@@ -100,3 +100,6 @@ InitTestScene*.unity*
 
 # Plastic
 .plastic/
+
+# macOS system files
+**/.DS_Store

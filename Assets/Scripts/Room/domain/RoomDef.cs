@@ -17,16 +17,14 @@ public class RoomDef : ScriptableObject
 	public List<RoomItemDef> defaultOwned = new();   // 常に購入済み扱い
 	public List<RoomItemDef> defaultEquipped = new();  // 最初に装備される
 
-	// ---- 便利ヘルパ（まだ Service からは呼ばない） ----
+	// ---- 便利ヘルパ ----
 
-	// 所持ID一覧を重複なしで返す
 	public IEnumerable<string> GetDefaultOwnedIds()
-			=> defaultOwned?.Where(x => x && !string.IsNullOrEmpty(x.id))
-											.Select(x => x.id)
-											.Distinct()
-				 ?? Enumerable.Empty<string>();
+		=> defaultOwned?.Where(x => x && !string.IsNullOrEmpty(x.id))
+						.Select(x => x.id)
+						.Distinct()
+			 ?? Enumerable.Empty<string>();
 
-	// 初期装備マップ（slotId -> itemId）を組み立て（後勝ち）
 	public Dictionary<string, string> BuildDefaultEquippedMap(string fallbackSlot = "avatar/body")
 	{
 		var map = new Dictionary<string, string>();
@@ -36,7 +34,6 @@ public class RoomDef : ScriptableObject
 		{
 			if (!def || string.IsNullOrEmpty(def.id)) continue;
 
-			// そのアイテムが使う全スロット（なければ fallbackSlot）
 			var slots = def.GetAllSlots();
 			bool any = false;
 			if (slots != null)
@@ -45,7 +42,7 @@ public class RoomDef : ScriptableObject
 				{
 					var slot = string.IsNullOrEmpty(s) ? fallbackSlot : s;
 					if (string.IsNullOrEmpty(slot)) continue;
-					map[slot] = def.id; // 同一スロットに複数あれば最後のものが採用
+					map[slot] = def.id;
 					any = true;
 				}
 			}
@@ -53,4 +50,22 @@ public class RoomDef : ScriptableObject
 		}
 		return map;
 	}
+
+#if UNITY_INCLUDE_TESTS
+	public static RoomDef Create(
+		string id,
+		IEnumerable<RoomItemDef> defaultOwned = null,
+		IEnumerable<RoomItemDef> defaultEquipped = null,
+		string displayName = null,
+		int price = 0)
+	{
+		var so = ScriptableObject.CreateInstance<RoomDef>();
+		so.id = id;
+		so.displayName = displayName ?? id;
+		so.price = price;
+		so.defaultOwned = defaultOwned != null ? new List<RoomItemDef>(defaultOwned) : new List<RoomItemDef>();
+		so.defaultEquipped = defaultEquipped != null ? new List<RoomItemDef>(defaultEquipped) : new List<RoomItemDef>();
+		return so;
+	}
+#endif
 }
