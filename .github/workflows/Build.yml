@@ -42,3 +42,35 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
+
+# ▼ ここから追加：iOS を TestFlight に送る macOS ジョブ
+  upload_ios_testflight:
+    needs: buildForAllSupportedPlatforms
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Ubuntu ジョブが上げた iOS アーティファクトを取得
+      - name: Download iOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-iOS            # ← 上の upload-artifact の name と一致
+          path: build/iOS            # ← Fastfile の project パスに合わせる
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Upload to TestFlight with Fastlane
+        env:
+          APPSTORE_KEY_ID:     ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID:  ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_P8:         ${{ secrets.APPSTORE_P8 }}
+          MATCH_REPOSITORY:    ${{ secrets.MATCH_REPOSITORY }}
+          GH_PAT:              ${{ secrets.GH_PAT }}
+          MATCH_PASSWORD:      ${{ secrets.MATCH_PASSWORD }}
+          IOS_BUNDLE_ID:       ${{ secrets.IOS_BUNDLE_ID }}
+        run: |
+          bundle exec fastlane ios beta
