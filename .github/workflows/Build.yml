@@ -46,11 +46,20 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           buildProfile:  ${{ matrix.buildProfile }}
 
+      # iOSの出力をその場で確認（期待する固定パスに無ければ即エラー）
+      - name: Assert iOS Xcode project exists
+        if: ${{ matrix.targetPlatform == 'iOS' }}
+        run: |
+          echo "After Unity build, tree under build/:"
+          ls -laR build || true
+          test -e "build/iOS/Unity-iPhone.xcodeproj" || (echo "::error::Expected Xcode project at build/iOS/Unity-iPhone.xcodeproj not found. Check iOS Build Profile (Export Xcode Project=ON, Output Path=build/iOS, Project name=Unity-iPhone)" && exit 1)
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
+          if-no-files-found: error
 
   # ▼ iOS を TestFlight にアップロードする macOS ジョブ
   upload_ios_testflight:
@@ -63,14 +72,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Build-iOS
-          # 出力先を固定せず build/ 直下に展開（プロファイルでフォルダ名が変わっても拾えるように）
-          path: build
+          # 固定：build/iOS に展開（Fastlane も同じ場所を見る）
+          path: build/iOS
 
-      # 展開結果を確認（トラブル時の診断用）
       - name: Show extracted iOS artifact tree
         run: |
           echo "PWD: $(pwd)"
-          ls -laR build || true
+          ls -laR build/iOS || true
 
       - uses: ruby/setup-ruby@v1
         with:
