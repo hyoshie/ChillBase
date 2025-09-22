@@ -15,7 +15,7 @@ MonoBehaviour:
   id: usa_c4
   displayName: C4
   price: 10
-  shopIcon: {fileID: 4574619284911970598, guid: 9e5e25376227c404491032fa9ba49574, type: 3}
+  shopIcon: {fileID: 297869254330597956, guid: 98ffeee986d654a5ea3d3360f939a6da, type: 3}
   category: {fileID: 11400000, guid: cc1a07f925fd145b594918ebbbd75b27, type: 2}
   visuals:
   - slot: {fileID: 11400000, guid: a9ecaf6500c944dfe99104dc8320e617, type: 2}
