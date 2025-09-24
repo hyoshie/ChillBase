@@ -2,6 +2,9 @@ default_platform(:ios)
 
 platform :ios do
   lane :beta do
+    # CI向け: Keychain 等の前処理
+    setup_ci
+
     api_key = app_store_connect_api_key(
       key_id: ENV["APPSTORE_KEY_ID"],
       issuer_id: ENV["APPSTORE_ISSUER_ID"],
@@ -9,23 +12,31 @@ platform :ios do
       is_key_content_base64: false
     )
 
-    # 認証付きURLを組み立て（GH_PAT を使う）
-    actor = ENV['GITHUB_ACTOR']      # Actions が自動で入れる実行ユーザー名
-    pat   = ENV['GH_PAT']            # Secrets の GH_PAT
+    # 認証付きURL（ios-certs へアクセス）
+    actor = ENV['GITHUB_ACTOR']
+    pat   = ENV['GH_PAT']
     repo  = ENV['MATCH_REPOSITORY']  # 例: yshima42/ios-certs
     authed_git_url = "https://#{actor}:#{pat}@github.com/#{repo}.git"
 
     match(
       type: "appstore",
       api_key: api_key,
-      git_url: authed_git_url,   # ← 認証付きURL
-      git_branch: "main",        # ← デフォルトmaster対策
-      readonly: true             # ← 読み取り専用（通常の配布時はこちら）
+      git_url: authed_git_url,
+      git_branch: "main",
+      readonly: true
     )
 
+    # 任意: ビルド番号自動 +1（重複防止）
+    begin
+      increment_build_number(xcodeproj: "build/iOS/Unity-iPhone.xcodeproj")
+    rescue
+      UI.important("increment_build_number skipped")
+    end
+
+    # 固定パスでXcodeビルド（Build Profileの出力を build/iOS に固定しておく）
     build_app(
       project: "build/iOS/Unity-iPhone.xcodeproj",
-      scheme: "Unity-iPhone",
+      scheme:  "Unity-iPhone",
       export_method: "app-store"
     )
 
@@ -35,7 +46,7 @@ platform :ios do
     )
   end
 
-  # 👇 初回の証明書作成・保存用（one-time）
+  # 初回の証明書作成・保存用（one-time）
   desc "Create certs & profiles to MATCH_REPOSITORY (one-time)"
   lane :setup_certs do
     api_key = app_store_connect_api_key(
@@ -55,7 +66,7 @@ platform :ios do
       api_key: api_key,
       git_url: authed_git_url,
       git_branch: "main",
-      readonly: false             # ← 作成＆保存（初回だけこれ）
+      readonly: false   # ← 初回だけ new/更新を許可
     )
   end
 end
