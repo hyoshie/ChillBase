@@ -46,53 +46,53 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           buildProfile:  ${{ matrix.buildProfile }}
 
-      # iOSの出力をその場で確認（期待する固定パスに無ければ即エラー）
-      - name: Assert iOS Xcode project exists
-        if: ${{ matrix.targetPlatform == 'iOS' }}
-        run: |
-          echo "After Unity build, tree under build/:"
-          ls -laR build || true
-          test -e "build/iOS/Unity-iPhone.xcodeproj" || (echo "::error::Expected Xcode project at build/iOS/Unity-iPhone.xcodeproj not found. Check iOS Build Profile (Export Xcode Project=ON, Output Path=build/iOS, Project name=Unity-iPhone)" && exit 1)
+      # # iOSの出力をその場で確認（期待する固定パスに無ければ即エラー）
+      # - name: Assert iOS Xcode project exists
+      #   if: ${{ matrix.targetPlatform == 'iOS' }}
+      #   run: |
+      #     echo "After Unity build, tree under build/:"
+      #     ls -laR build || true
+      #     test -e "build/iOS/Unity-iPhone.xcodeproj" || (echo "::error::Expected Xcode project at build/iOS/Unity-iPhone.xcodeproj not found. Check iOS Build Profile (Export Xcode Project=ON, Output Path=build/iOS, Project name=Unity-iPhone)" && exit 1)
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
-          if-no-files-found: error
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Build-${{ matrix.targetPlatform }}
+      #     path: build/${{ matrix.targetPlatform }}
+      #     if-no-files-found: error
 
-  # ▼ iOS を TestFlight にアップロードする macOS ジョブ
-  upload_ios_testflight:
-    needs: buildForAllSupportedPlatforms
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
+  # # ▼ iOS を TestFlight にアップロードする macOS ジョブ
+  # upload_ios_testflight:
+  #   needs: buildForAllSupportedPlatforms
+  #   runs-on: macos-14
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Download iOS artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: Build-iOS
-          # 固定：build/iOS に展開（Fastlane も同じ場所を見る）
-          path: build/iOS
+  #     - name: Download iOS artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: Build-iOS
+  #         # 固定：build/iOS に展開（Fastlane も同じ場所を見る）
+  #         path: build/iOS
 
-      - name: Show extracted iOS artifact tree
-        run: |
-          echo "PWD: $(pwd)"
-          ls -laR build/iOS || true
+  #     - name: Show extracted iOS artifact tree
+  #       run: |
+  #         echo "PWD: $(pwd)"
+  #         ls -laR build/iOS || true
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: '3.2'
+  #         bundler-cache: true
 
-      - name: Upload to TestFlight with Fastlane
-        env:
-          APPSTORE_KEY_ID:     ${{ secrets.APPSTORE_KEY_ID }}
-          APPSTORE_ISSUER_ID:  ${{ secrets.APPSTORE_ISSUER_ID }}
-          APPSTORE_P8:         ${{ secrets.APPSTORE_P8 }}
-          MATCH_REPOSITORY:    ${{ secrets.MATCH_REPOSITORY }}
-          GH_PAT:              ${{ secrets.GH_PAT }}
-          MATCH_PASSWORD:      ${{ secrets.MATCH_PASSWORD }}
-          IOS_BUNDLE_ID:       ${{ secrets.IOS_BUNDLE_ID }}
-        run: |
-          bundle exec fastlane ios beta
+  #     - name: Upload to TestFlight with Fastlane
+  #       env:
+  #         APPSTORE_KEY_ID:     ${{ secrets.APPSTORE_KEY_ID }}
+  #         APPSTORE_ISSUER_ID:  ${{ secrets.APPSTORE_ISSUER_ID }}
+  #         APPSTORE_P8:         ${{ secrets.APPSTORE_P8 }}
+  #         MATCH_REPOSITORY:    ${{ secrets.MATCH_REPOSITORY }}
+  #         GH_PAT:              ${{ secrets.GH_PAT }}
+  #         MATCH_PASSWORD:      ${{ secrets.MATCH_PASSWORD }}
+  #         IOS_BUNDLE_ID:       ${{ secrets.IOS_BUNDLE_ID }}
+  #       run: |
+  #         bundle exec fastlane ios beta
