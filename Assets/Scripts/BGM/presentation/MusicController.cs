@@ -1,18 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Linq;
 
 public class MusicController : MonoBehaviour
 {
 	[Header("Audio")]
 	[SerializeField] private AudioSource audioSource;
-	[SerializeField] private List<AudioClip> audioClips = new();
-	// MusicController.cs のクラス内に追加
-	public IReadOnlyList<AudioClip> Clips => audioClips;
-	public int CurrentIndex => currentIndex;
-
+	[SerializeField] private TrackCatalog catalog;
 
 	[Header("UI - Controls")]
 	[SerializeField] private Button prevButton;
@@ -20,8 +17,8 @@ public class MusicController : MonoBehaviour
 	[SerializeField] private Button nextButton;
 
 	[Header("UI - PlayMode")]
-	[SerializeField] private Button playModeButton;   // モード切替用ボタン
-	[SerializeField] private Image playModeIcon;      // 現在のモード表示
+	[SerializeField] private Button playModeButton;   // 再生モード切替
+	[SerializeField] private Image playModeIcon;      // アイコン表示
 	[SerializeField] private Sprite sequentialSprite; // 順番再生アイコン
 	[SerializeField] private Sprite repeatOneSprite;  // 一曲リピートアイコン
 
@@ -34,17 +31,17 @@ public class MusicController : MonoBehaviour
 	[SerializeField] private Button openSelectionPanelButton;
 	[SerializeField] private MusicSelectPanelController selectionPanel;
 
-	// ★ デバッグ
 	[Header("UI - Debug")]
-	[SerializeField] private Button jumpLast5SecButton; // 残り5秒へ
+	[SerializeField] private Button jumpLast5SecButton;
 
 	[Header("Options")]
 	[SerializeField] private bool autoPlayOnStart = false;
-	[SerializeField] private bool loopPlaylist = true; // Sequential時のみ利用
+	[SerializeField] private bool loopPlaylist = true; // 順番再生のときのみ利用
 
 	private int currentIndex = -1;
 	private bool isPlaying = false;
 	private PlayMode playMode;
+	private AsyncOperationHandle<AudioClip> currentHandle;
 
 	private void Awake()
 	{
@@ -54,9 +51,9 @@ public class MusicController : MonoBehaviour
 		if (playModeButton) playModeButton.onClick.AddListener(CyclePlayMode);
 		if (jumpLast5SecButton) jumpLast5SecButton.onClick.AddListener(JumpToLast5Seconds);
 		if (openSelectionPanelButton) openSelectionPanelButton.onClick.AddListener(() =>
-{
-	if (selectionPanel) selectionPanel.Show();
-});
+		{
+			if (selectionPanel) selectionPanel.Show();
+		});
 
 		// 保存されたモードをロード
 		playMode = PlayModeStore.Load();
@@ -68,8 +65,11 @@ public class MusicController : MonoBehaviour
 		audioSource.loop = false;
 		audioSource.playOnAwake = false;
 
-		if (audioClips.Count > 0) SelectTrack(0, autoPlayOnStart);
+		if (catalog && catalog.tracks.Length > 0)
+			SelectTrack(0, autoPlayOnStart);
+
 		if (selectionPanel) selectionPanel.Init(this);
+
 		UpdateUI();
 	}
 
@@ -81,6 +81,11 @@ public class MusicController : MonoBehaviour
 		{
 			HandleTrackFinished();
 		}
+	}
+
+	private void OnDestroy()
+	{
+		if (currentHandle.IsValid()) Addressables.Release(currentHandle);
 	}
 
 	// --------------------
@@ -131,36 +136,55 @@ public class MusicController : MonoBehaviour
 
 	public void Next(bool autoPlay)
 	{
-		if (audioClips.Count == 0) return;
-		int next = (currentIndex + 1) % audioClips.Count;
+		if (catalog == null || catalog.tracks.Length == 0) return;
+		int next = (currentIndex + 1) % catalog.tracks.Length;
 		SelectTrack(next, autoPlay || isPlaying);
 	}
 
 	public void Prev()
 	{
-		if (audioClips.Count == 0) return;
-		int prev = (currentIndex - 1 + audioClips.Count) % audioClips.Count;
+		if (catalog == null || catalog.tracks.Length == 0) return;
+		int prev = (currentIndex - 1 + catalog.tracks.Length) % catalog.tracks.Length;
 		SelectTrack(prev, isPlaying);
 	}
 
 	public void SelectTrack(int index, bool autoPlay = false)
 	{
-		if (!audioSource || index < 0 || index >= audioClips.Count) return;
+		if (!audioSource || catalog == null || index < 0 || index >= catalog.tracks.Length) return;
+
+		// 前のハンドルを解放
+		if (currentHandle.IsValid())
+			Addressables.Release(currentHandle);
 
 		currentIndex = index;
-		audioSource.clip = audioClips[index];
-		audioSource.time = 0f;
 
-		if (autoPlay) { audioSource.Play(); isPlaying = true; }
-		else { audioSource.Pause(); isPlaying = false; }
+		// ロード前から表示名を出す
+		titleText.text = catalog.tracks[index].displayName;
 
-		UpdateUI();
+		var entry = catalog.tracks[index];
+		currentHandle = entry.clip.LoadAssetAsync<AudioClip>();
+		currentHandle.Completed += op =>
+		{
+			if (op.Status == AsyncOperationStatus.Succeeded)
+			{
+				audioSource.clip = op.Result;
+				audioSource.time = 0f;
+
+				if (autoPlay) { audioSource.Play(); isPlaying = true; }
+				else { audioSource.Pause(); isPlaying = false; }
+			}
+			else
+			{
+				Debug.LogError($"Failed to load {entry.displayName}");
+			}
+
+			UpdateUI();
+		};
 	}
 
 	// --------------------
 	// デバッグ: 残り5秒へジャンプ
 	// --------------------
-	// 残り5秒へ（短い曲は残り0.1秒へ）ジャンプ
 	private void JumpToLast5Seconds()
 	{
 		if (!audioSource || !audioSource.clip) return;
@@ -168,42 +192,34 @@ public class MusicController : MonoBehaviour
 		var clip = audioSource.clip;
 		bool wasPlaying = isPlaying || audioSource.isPlaying;
 
-		// 5秒より短い曲は、終端の手前0.1秒に置く
 		float backSeconds = (clip.length > 5f) ? 5f : 0.1f;
-
 		int offsetSamples = Mathf.CeilToInt(clip.frequency * backSeconds);
 		int targetSamples = Mathf.Clamp(clip.samples - offsetSamples, 0, clip.samples - 1);
 
-		// ※ Play() で先頭に戻るのを避けるため Stop → timeSamples セット
 		audioSource.Stop();
 		audioSource.timeSamples = targetSamples;
 
 		if (wasPlaying)
 		{
 			audioSource.Play();
-			isPlaying = true; // 自前フラグも同期
+			isPlaying = true;
 		}
 
 		UpdateUI();
 	}
-
 
 	// --------------------
 	// UI更新
 	// --------------------
 	private void UpdateUI()
 	{
-		if (titleText)
-		{
-			string name = (currentIndex >= 0 && currentIndex < audioClips.Count && audioClips[currentIndex])
-					? audioClips[currentIndex].name : "-";
-			titleText.text = name;
-		}
+		if (titleText && currentIndex >= 0 && catalog && catalog.tracks.Length > currentIndex)
+			titleText.text = catalog.tracks[currentIndex].displayName;
 
 		if (playPauseIcon && playSprite && pauseSprite)
 			playPauseIcon.sprite = isPlaying ? pauseSprite : playSprite;
 
-		bool hasClip = audioClips.Count > 0;
+		bool hasClip = (catalog && catalog.tracks.Length > 0);
 		if (prevButton) prevButton.interactable = hasClip;
 		if (nextButton) nextButton.interactable = hasClip;
 		if (playPauseButton) playPauseButton.interactable = hasClip;
