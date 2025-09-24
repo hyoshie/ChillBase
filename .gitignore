@@ -103,3 +103,6 @@ InitTestScene*.unity*
 
 # macOS system files
 **/.DS_Store
+
+# Build Reports
+Assets/BuildReports/

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: USA
   displayName: USA
   price: 20
-  icon: {fileID: 76713708, guid: 250ea0d74ea494362b8185130db24c10, type: 3}
+  icon: {fileID: 1717361085133701336, guid: 9fa3b0b07f60a48cb825728026f90a9a, type: 3}
   defaultOwned:
   - {fileID: 11400000, guid: e903a327fae514324b0b0ee7c9a8100b, type: 2}
   defaultEquipped:

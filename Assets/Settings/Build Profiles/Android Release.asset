@@ -167,6 +167,12 @@ MonoBehaviour:
     - line: '|   preloadedAssets:'
     - line: '|   - {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100,
         type: 3}'
+    - line: '|   - {fileID: -5435748848423978486, guid: a13e1797387f64e88b9d08a718568e34,
+        type: 2}'
+    - line: '|   - {fileID: 11400000, guid: f1da83b8a79224edda343991ea052520, type:
+        2}'
+    - line: '|   - {fileID: 11400000, guid: 2c030016cf43a40f5be1e471b80b634b, type:
+        2}'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
     - line: '|   m_HolographicPauseOnTrackingLoss: 1'
@@ -968,7 +974,7 @@ MonoBehaviour:
         m_ExplicitNullChecks: 0
         m_ExplicitDivideByZeroChecks: 0
         m_ExplicitArrayBoundsChecks: 0
-        m_CompressionType: 2
+        m_CompressionType: 0
         m_InstallInBuildFolder: 0
         m_BuildSubtarget: 0
         m_BuildSystem: 1
