@@ -9,9 +9,9 @@ public class PomodoroTimer : MonoBehaviour
 	public TextMeshProUGUI timerText;
 
 	[Header("UI: 操作")]
-	public Button startButton;
-	public Button stopButton;
+	public Button startStopButton;
 	public Button resetButton;
+	public TextMeshProUGUI startStopText;
 
 	[Header("UI: 設定")]
 	public Button settingsButton;
@@ -103,8 +103,7 @@ public class PomodoroTimer : MonoBehaviour
 		currentTime = workDuration;
 		UpdateTimerText();
 
-		startButton.onClick.AddListener(StartTimer);
-		stopButton.onClick.AddListener(StopTimer);
+		startStopButton.onClick.AddListener(ToggleTimer);
 		resetButton.onClick.AddListener(ResetTimer);
 
 		if (settingsPanel != null) settingsPanel.SetActive(false);
@@ -132,13 +131,28 @@ public class PomodoroTimer : MonoBehaviour
 
 		UpdateWorkLabel(savedWorkMin);
 		UpdateBreakLabel(savedBreakMin);
+
+		UpdateStartStopUI();
 	}
+
+	void ToggleTimer()
+    {
+        if (isRunning) StopTimer();
+        else StartTimer();
+    }
+
+	void UpdateStartStopUI()
+    {
+        if (startStopText != null)
+            startStopText.text = isRunning ? "Stop" : "Start";
+    }
 
 	void StartTimer()
 	{
 		if (isRunning) return;
 		isRunning = true;
 		if (settingsButton) settingsButton.interactable = false;
+		UpdateStartStopUI();
 		InvokeRepeating(nameof(Tick), 1f, 1f);
 	}
 
@@ -147,6 +161,7 @@ public class PomodoroTimer : MonoBehaviour
 		isRunning = false;
 		if (settingsButton) settingsButton.interactable = true;
 		CancelInvoke(nameof(Tick));
+		UpdateStartStopUI();
 	}
 
 	void ResetTimer()
@@ -154,6 +169,7 @@ public class PomodoroTimer : MonoBehaviour
 		StopTimer();
 		currentTime = isWorkSession ? workDuration : breakDuration;
 		UpdateTimerText();
+		UpdateStartStopUI();
 	}
 
 	void Tick()
