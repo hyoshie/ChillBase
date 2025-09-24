@@ -5477,10 +5477,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioSource: {fileID: 986282352}
   audioClips:
-  - {fileID: 8300000, guid: 270f5be5836a742d0a7fbeb325536df2, type: 3}
-  - {fileID: 8300000, guid: a2134263add8f4cc380afdf048b603b1, type: 3}
-  - {fileID: 8300000, guid: 3c17e3a76feb9419b8cd01d915fa52c1, type: 3}
-  - {fileID: 8300000, guid: bf946b78ab9724538847bfad4c13980f, type: 3}
+  - {fileID: 8300000, guid: 0051c609356b749c081e29acaf79cddb, type: 3}
+  - {fileID: 8300000, guid: 254c8ee7d8dc7457988d5b25cb732658, type: 3}
+  - {fileID: 8300000, guid: 166d8f4c2b0914d8f977a80242d00ba1, type: 3}
+  - {fileID: 8300000, guid: c0f63ea2fd0cf42c5ab087a490700549, type: 3}
+  - {fileID: 8300000, guid: 9dbae9a300fda4a7282b663a1101628b, type: 3}
+  - {fileID: 8300000, guid: 7e3eab9bc35f645368148cde17e3275e, type: 3}
+  - {fileID: 8300000, guid: 278098d4beda041bb8e529fbcd8bc61c, type: 3}
+  - {fileID: 8300000, guid: 40c4371f639a84ffa9d16d85aab574e8, type: 3}
+  - {fileID: 8300000, guid: 9d934978efaad4102a08e036826385b1, type: 3}
+  - {fileID: 8300000, guid: d31b42f6bfc064d9cb9e9493faf39f0f, type: 3}
+  - {fileID: 8300000, guid: 943a1799ffea84ac9b0ef1471ce0cc39, type: 3}
+  - {fileID: 8300000, guid: a855c882e1b5149d8a82f1786fffb39f, type: 3}
+  - {fileID: 8300000, guid: 6eafc955587004d039abac74e8f0b691, type: 3}
+  - {fileID: 8300000, guid: a0d3e89137d404ac69f07ef4c03b58d6, type: 3}
+  - {fileID: 8300000, guid: ee68f17ae03f34f3a91ad7504dde92ea, type: 3}
+  - {fileID: 8300000, guid: 2fbfcf6d92da44a95b9ff887752f8f5a, type: 3}
+  - {fileID: 8300000, guid: c18a18d06226f4ffba1d2a04d82188e7, type: 3}
+  - {fileID: 8300000, guid: 2442b809f4f034a2eb7d46351158b36b, type: 3}
   prevButton: {fileID: 1332546215}
   playPauseButton: {fileID: 312157479}
   nextButton: {fileID: 1110231703}
