@@ -1590,13 +1590,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 250103543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9be4b4ff0654c4fbfb2ef37f77b48d07, type: 3}
+  m_Script: {fileID: 11500000, guid: 50c73bc4b6f9b431897a6bf166ca0d9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   panelRoot: {fileID: 250103543}
   closeButton: {fileID: 136678232}
   contentRoot: {fileID: 36034655}
   itemPrefab: {fileID: 6542080842660109842, guid: 7fc4432d05f8a4351b63b8eda0d20fd4, type: 3}
+  catalog: {fileID: 11400000, guid: 3cff54cb2b0c84fff9d9636e2efc8eed, type: 2}
 --- !u!114 &250103546
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4559,6 +4560,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 754520735}
   m_CullTransparentMesh: 1
+--- !u!1 &779839036
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 779839037}
+  - component: {fileID: 779839038}
+  m_Layer: 0
+  m_Name: AssetLoader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &779839037
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779839036}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 848899899}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &779839038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779839036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b5d53370b6ab460cb6ccc95a51ea33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &823985758
 GameObject:
   m_ObjectHideFlags: 0
@@ -4775,6 +4820,7 @@ Transform:
   - {fileID: 1840174224}
   - {fileID: 1247006516}
   - {fileID: 1600847586}
+  - {fileID: 779839037}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &858554446
@@ -5472,15 +5518,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 986282350}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca2c75f164ca840ce88d87bf991b0d9d, type: 3}
+  m_Script: {fileID: 11500000, guid: d320603987fa04fb887389e92b6be264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 986282352}
-  audioClips:
-  - {fileID: 8300000, guid: 270f5be5836a742d0a7fbeb325536df2, type: 3}
-  - {fileID: 8300000, guid: a2134263add8f4cc380afdf048b603b1, type: 3}
-  - {fileID: 8300000, guid: 3c17e3a76feb9419b8cd01d915fa52c1, type: 3}
-  - {fileID: 8300000, guid: bf946b78ab9724538847bfad4c13980f, type: 3}
+  catalog: {fileID: 11400000, guid: 3cff54cb2b0c84fff9d9636e2efc8eed, type: 2}
   prevButton: {fileID: 1332546215}
   playPauseButton: {fileID: 312157479}
   nextButton: {fileID: 1110231703}
@@ -5494,7 +5536,7 @@ MonoBehaviour:
   pauseSprite: {fileID: -1430665969530472241, guid: c56fbee0212af486cbc9afec58243ff5, type: 3}
   openSelectionPanelButton: {fileID: 143259863}
   selectionPanel: {fileID: 250103545}
-  jumpLast5SecButton: {fileID: 1841502033}
+  jumpLast5SecButton: {fileID: 313225106}
   autoPlayOnStart: 0
   loopPlaylist: 1
 --- !u!114 &986282354
