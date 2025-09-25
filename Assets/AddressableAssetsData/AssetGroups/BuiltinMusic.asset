@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: BaseMusic
+  m_Name: BuiltinMusic
   m_EditorClassIdentifier: 
-  m_GroupName: Packed Assets
+  m_GroupName: BuiltinMusic
   m_GUID: c4239f4a8ebfc43979b483175b4fbb1b
   m_SerializeEntries:
   - m_GUID: 0051c609356b749c081e29acaf79cddb
@@ -22,6 +22,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 254c8ee7d8dc7457988d5b25cb732658
     m_Address: Assets/Audio/BGM/A Cup of You (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9dbae9a300fda4a7282b663a1101628b
+    m_Address: Assets/Audio/BGM/Dreamcatcher.mp3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
