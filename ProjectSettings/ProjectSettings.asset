@@ -912,11 +912,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 5de04b18-3142-41d2-ba9e-3e0f2a734eba
+  cloudProjectId: 4140adc0-8df1-4887-92a8-5f3c19447e7a
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: LoadyDungeone
-  organizationId: unity_8f68aeb14ff830fd7ede
+  projectName: ChillBase
+  organizationId: shirafulife
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
