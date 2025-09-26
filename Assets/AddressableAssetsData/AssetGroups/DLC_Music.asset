@@ -14,7 +14,97 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: DLC_Music
   m_GUID: 32db0c0328b4f40ea8472e6f00d3c582
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 166d8f4c2b0914d8f977a80242d00ba1
+    m_Address: Assets/Audio/BGM/Coffee and You.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2442b809f4f034a2eb7d46351158b36b
+    m_Address: Assets/Audio/BGM/Whispers in the Fog (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 278098d4beda041bb8e529fbcd8bc61c
+    m_Address: Assets/Audio/BGM/Neon Reverie.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2fbfcf6d92da44a95b9ff887752f8f5a
+    m_Address: Assets/Audio/BGM/Study Serenade (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40c4371f639a84ffa9d16d85aab574e8
+    m_Address: Assets/Audio/BGM/Neon Reverie (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6eafc955587004d039abac74e8f0b691
+    m_Address: Assets/Audio/BGM/Rainy Reverie (2).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e3eab9bc35f645368148cde17e3275e
+    m_Address: Assets/Audio/BGM/Dreamcatcher (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 943a1799ffea84ac9b0ef1471ce0cc39
+    m_Address: Assets/Audio/BGM/Rainy Reverie.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d934978efaad4102a08e036826385b1
+    m_Address: Assets/Audio/BGM/Neon Reverie (2).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a0d3e89137d404ac69f07ef4c03b58d6
+    m_Address: Assets/Audio/BGM/Rainy Reverie (3).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a855c882e1b5149d8a82f1786fffb39f
+    m_Address: Assets/Audio/BGM/Rainy Reverie (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0f63ea2fd0cf42c5ab087a490700549
+    m_Address: Assets/Audio/BGM/Coffee and You (1).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c18a18d06226f4ffba1d2a04d82188e7
+    m_Address: Assets/Audio/BGM/Whispers in the Fog.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d31b42f6bfc064d9cb9e9493faf39f0f
+    m_Address: Assets/Audio/BGM/Neon Reverie (3).mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ee68f17ae03f34f3a91ad7504dde92ea
+    m_Address: Assets/Audio/BGM/Study Serenade.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - premium
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 5d7e652b8c0b445f28ba5d6437e6fb97, type: 2}
   m_SchemaSet:
