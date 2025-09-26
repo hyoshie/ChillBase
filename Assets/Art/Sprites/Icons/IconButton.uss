@@ -1,0 +1,11 @@
+:root {
+}
+
+.icon {
+    padding-top: 4px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    width: 30px;
+    height: 30px;
+}

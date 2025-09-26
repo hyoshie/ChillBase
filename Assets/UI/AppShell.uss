@@ -1,0 +1,101 @@
+/* === AppShell.uss (UI Builder 互換版) === */
+
+.app { width:100%; height:100%; }
+
+/* Header */
+/* ヘッダーを横並びにして左右に分配 */
+.header {
+  height:56px;
+  padding-left:12px; padding-right:12px; padding-top:8px; padding-bottom:8px;
+  background-color: rgba(0,0,0,0.25);
+
+  flex-direction: row;          /* ← 重要：横並び */
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 左側はそのまま（タイトル等） */
+.header-left  { flex-direction: row; align-items: center; }
+.title { font-size:16px; color:white; }
+
+/* 右側を横並びに */
+.header-right { flex-direction: row; align-items: center; }
+
+/* アイコンボタン */
+.btn {
+  width:28px; height:28px;
+  border-top-width:0; border-right-width:0; border-bottom-width:0; border-left-width:0;
+  background-color: rgba(0,0,0,0);
+  padding-left:6px; padding-right:6px; padding-top:6px; padding-bottom:6px;
+  margin-left:10px;              /* ← gap 代替で間隔を作る */
+}
+.btn:hover  { opacity:0.9; }
+.btn:active { transform: scale(0.96,0.96); }
+
+/* 画像を割り当て（PNG運用の場合） */
+.btn.-shop     { background-image: resource("UI/Icons/shop");     background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }
+.btn.-wardrobe { background-image: resource("UI/Icons/wardrobe"); background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }
+.btn.-work     { background-image: resource("UI/Icons/work");     background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }
+.btn.-settings { background-image: resource("UI/Icons/gear");     background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }
+/* Overlay Panel 本体 */
+.panel {
+  position: absolute; left:0; right:0; top:0; bottom:0;
+  /* flex 中央寄せ */
+  justify-content: center; align-items: center;
+  background-color: rgba(0,0,0,0.35);
+  opacity: 0;
+}
+
+/* カード（中身） */
+.card {
+  width:320px; /* 必要なら調整 */
+  padding-left:16px; padding-right:16px; padding-top:16px; padding-bottom:16px;
+  background-color: rgba(32,34,37,0.93);
+  color:white;
+  flex-direction: column;
+
+  /* 角丸（個別指定にする） */
+  border-top-left-radius:12px;
+  border-top-right-radius:12px;
+  border-bottom-left-radius:12px;
+  border-bottom-right-radius:12px;
+}
+
+/* 表示/非表示（クリック可否は picking-mode で） */
+.is-hidden { opacity:0; picking-mode: ignore; }
+.is-open   { opacity:1; picking-mode: position; }
+
+/* ==== Footer ==== */
+.footer {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 48px;
+  background-color: rgba(0,0,0,0.35);
+  padding-left: 8px; padding-right: 8px; padding-top: 6px; padding-bottom: 6px;
+}
+
+.footer-row {
+  flex-direction: row; align-items: center;
+}
+
+/* 曲名・時間・スライダー */
+.track-title { color: white; font-size: 12px; margin-right: 8px; }
+.time-left   { color: white; font-size: 12px; margin-left: 8px; width: 48px; text-align: right; }
+
+.track-progress {
+  flex-grow: 1;
+  margin-left: 8px; margin-right: 8px;
+  height: 16px;
+}
+
+/* 音楽ボタン */
+.mbtn {
+  width: 24px; height: 24px;
+  border-top-width:0; border-right-width:0; border-bottom-width:0; border-left-width:0;
+  background-color: rgba(0,0,0,0);
+  margin-left: 6px; margin-right: 0px;
+}
+
+/* アイコン画像は後で差し替え可能（PNG想定） */
+.mbtn.-prev  { background-image: resource("UI/Icons/prev");  background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }
+.mbtn.-play  { background-image: resource("UI/Icons/play");  background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }
+.mbtn.-next  { background-image: resource("UI/Icons/next");  background-repeat:no-repeat; -unity-background-scale-mode: scale-to-fit; }

@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/AppShell.uss?fileID=7433441132597879392&amp;guid=8965ac898df98489398ac66af1164549&amp;type=3#AppShell" />
+    <ui:VisualElement name="Root" class="app">
+        <ui:VisualElement name="Header" class="header">
+            <ui:VisualElement name="HeaderLeft" class="header-left">
+                <ui:Label name="Title" text="Label" class="title" />
+            </ui:VisualElement>
+            <ui:VisualElement name="HeaderRight" class="header-right">
+                <ui:Button name="BtnShop" parse-escape-sequences="true" class="btn -shop" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/Menu/apparel_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.png?fileID=2800000&amp;guid=99da2e536cdda45f89b6646164c7a14e&amp;type=3#apparel_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48&quot;);" />
+                <ui:Button name="BtnWardrobe" class="btn -wardrobe" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/Menu/travel_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.png?fileID=2800000&amp;guid=2cc89edd70d5b488b81cfe87faacd900&amp;type=3#travel_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48&quot;);" />
+                <ui:Button name="BtnWork" class="btn -work" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/Menu/timer_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.png?fileID=2800000&amp;guid=dbdc5752ce0a8417281ed2b95a27254b&amp;type=3#timer_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48&quot;);" />
+                <ui:Button name="BtnSettings" class="btn -settings" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/Menu/settings-3-fill.png?fileID=2800000&amp;guid=6e4efc0b8e8644d0ab2c94025c62b22a&amp;type=3#settings-3-fill&quot;);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Footer" class="footer">
+            <ui:VisualElement name="FooterRow" class="footer-row">
+                <ui:Label name="TrackTitle" text="—" class="track-title" />
+                <ui:Slider name="TrackProgress" low-value="0" high-value="100" value="0" class="track-progress" />
+                <ui:Label name="TimeLeft" text="00:00" class="time-left" />
+                <ui:Button name="BtnPrev" class="mbtn -prev" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/BGM/skip_previous_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.png?fileID=2800000&amp;guid=9f8fa2a66b12d4f9195d80e9582fa719&amp;type=3#skip_previous_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48&quot;);" />
+                <ui:Button name="BtnPlay" class="mbtn -play" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/BGM/play_arrow_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.png?fileID=2800000&amp;guid=3de0f846b3b884a13944d499bf584464&amp;type=3#play_arrow_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48&quot;);" />
+                <ui:Button name="BtnNext" class="mbtn -next" style="background-image: url(&quot;project://database/Assets/Art/Sprites/Icons/BGM/skip_next_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.png?fileID=2800000&amp;guid=df244b78f10ae45cf82e98b372735b22&amp;type=3#skip_next_48dp_FFFFFF_FILL0_wght400_GRAD0_opsz48&quot;);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="PanelWork" class="panel is-hidden" />
+        <ui:VisualElement name="PanelWardrobe" class="panel is-hidden" />
+        <ui:VisualElement name="PanelShop" class="panel is-hidden" />
+        <ui:VisualElement name="PanelSettings" class="panel is-hidden" />
+    </ui:VisualElement>
+</ui:UXML>
