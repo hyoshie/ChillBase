@@ -5967,9 +5967,9 @@ GameObject:
   - component: {fileID: 986282356}
   - component: {fileID: 986282355}
   - component: {fileID: 986282354}
-  - component: {fileID: 986282353}
   - component: {fileID: 986282352}
   - component: {fileID: 986282357}
+  - component: {fileID: 986282358}
   m_Layer: 5
   m_Name: BottomPlayerBar
   m_TagString: Untagged
@@ -6099,18 +6099,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &986282353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 986282350}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d320603987fa04fb887389e92b6be264, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &986282354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6202,6 +6190,23 @@ MonoBehaviour:
   openSelectionPanelButton: {fileID: 143259863}
   selectionPanel: {fileID: 250103548}
   jumpLast5SecButton: {fileID: 1841502033}
+--- !u!114 &986282358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 986282350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 887d83c74dac047139d78aa417685d7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waitOverlay: {fileID: 484055813}
+  statusText: {fileID: 814730868}
+  downloadButton: {fileID: 1217513066}
+  memoryButton: {fileID: 1698502042}
+  clearButton: {fileID: 635571205}
 --- !u!1 &996905022
 GameObject:
   m_ObjectHideFlags: 0
