@@ -1,94 +1,62 @@
+
 using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public sealed class MusicSnapshot
-{
-	public int CurrentIndex { get; }
-	public bool IsPlaying { get; }
-	public string Title { get; }
-	public bool HasAnyTrack { get; }
-	public PlayMode PlayMode { get; }
-
-	public MusicSnapshot(int currentIndex, bool isPlaying, string title, bool hasAnyTrack, PlayMode playMode)
-	{
-		CurrentIndex = currentIndex;
-		IsPlaying = isPlaying;
-		Title = title;
-		HasAnyTrack = hasAnyTrack;
-		PlayMode = playMode;
-	}
-}
-
-public interface IMusicService : IDisposable
-{
-	event Action<MusicSnapshot> OnChanged;
-
-	PlayMode PlayMode { get; }
-	TrackCatalog Catalog { get; }   // ← 追加（読み取り専用）
-
-	void Initialize(bool autoPlayOnStart);
-	void TogglePlay();
-	void Next(bool autoPlayOverride = false);
-	void Prev();
-	void SelectTrack(int index, bool autoPlay = false);
-	void CyclePlayMode();
-	void JumpToLast5Seconds();
-	void Tick(); // 毎フレーム呼ぶ
-}
-
 [CreateAssetMenu(menuName = "Music/MusicServiceSO")]
 public class MusicServiceSO : ScriptableObject, IMusicService
 {
 	[Header("Config (Data)")]
-	[SerializeField] private TrackCatalog catalog;
-	public TrackCatalog Catalog => catalog;  //
+	[SerializeField] private TrackCatalogSet catalogSet;       // 複数カタログ前提
 	[SerializeField] private bool loopPlaylist = true;
 
-	// シーン側のAudioSourceはSOに直シリアライズできないので、起動時にバインド
 	[NonSerialized] private AudioSource _audioSource;
 
-	// 状態（元クラスの内容をそのまま保持）
+	private int _currentCatalogIndex = 0;
 	private int _currentIndex = -1;
 	private bool _isPlaying = false;
+
+	public event Action<MusicSnapshot> OnChanged;
 	public PlayMode PlayMode { get; private set; }
+	public TrackCatalogSet CatalogSet => catalogSet;
+	public int CurrentCatalogIndex => _currentCatalogIndex;
 
 	private AsyncOperationHandle<AudioClip> _currentHandle;
 
-	public event Action<MusicSnapshot> OnChanged;
+	// ========= ランタイム・セットアップ =========
 
-	/// <summary>シーンのAudioSourceを渡してバインド。起動時に1回。</summary>
 	public void BindRuntime(AudioSource audio)
 	{
 		_audioSource = audio;
-
 		if (_audioSource)
 		{
 			_audioSource.loop = false;
 			_audioSource.playOnAwake = false;
 		}
-
-		// 保存されたモードをロード
 		PlayMode = PlayModeStore.Load();
-
 		PushChanged();
 	}
 
-	// ------ IMusicService 実装（元のロジックをSOに移植） ------
-
 	public void Initialize(bool autoPlayOnStart)
 	{
-		if (catalog && catalog.tracks.Length > 0)
+		// 最初の非空カタログに合わせる
+		int first = FindNextNonEmptyCatalog(-1, +1);
+		if (first >= 0)
 		{
-			SelectTrack(0, autoPlayOnStart);
+			_currentCatalogIndex = first;
+			SelectTrack(_currentCatalogIndex, 0, autoPlayOnStart);
 		}
 		else
 		{
+			_currentIndex = -1;
+			_isPlaying = false;
 			PushChanged();
 		}
 	}
+
+	// ========= 再生制御 =========
 
 	public void TogglePlay()
 	{
@@ -104,35 +72,74 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 			_audioSource.Play();
 			_isPlaying = true;
 		}
-
 		PushChanged();
 	}
 
 	public void Next(bool autoPlayOverride = false)
 	{
-		if (catalog == null || catalog.tracks.Length == 0) return;
-		int next = (_currentIndex + 1) % catalog.tracks.Length;
-		SelectTrack(next, autoPlayOverride || _isPlaying);
+		if (!TryGetNextAcross(out int nextCat, out int nextTrack))
+		{
+			// 全体末尾：loopPlaylist なら先頭へ、なければ停止
+			if (loopPlaylist)
+			{
+				int first = FindNextNonEmptyCatalog(-1, +1);
+				if (first >= 0) SelectTrack(first, 0, autoPlayOverride || _isPlaying);
+				else { _isPlaying = false; PushChanged(); }
+			}
+			else
+			{
+				_isPlaying = false;
+				PushChanged();
+			}
+			return;
+		}
+
+		SelectTrack(nextCat, nextTrack, autoPlayOverride || _isPlaying);
 	}
 
 	public void Prev()
 	{
-		if (catalog == null || catalog.tracks.Length == 0) return;
-		int prev = (_currentIndex - 1 + catalog.tracks.Length) % catalog.tracks.Length;
-		SelectTrack(prev, _isPlaying);
+		if (!TryGetPrevAcross(out int prevCat, out int prevTrack))
+		{
+			// 全体先頭：loopPlaylist なら最後へ、なければ停止
+			if (loopPlaylist)
+			{
+				int lastCat = FindNextNonEmptyCatalog(0, -1);
+				if (lastCat >= 0)
+				{
+					var c = GetCatalog(lastCat);
+					int t = Mathf.Max(0, (c?.tracks?.Length ?? 1) - 1);
+					SelectTrack(lastCat, t, _isPlaying);
+				}
+				else { _isPlaying = false; PushChanged(); }
+			}
+			else
+			{
+				_isPlaying = false;
+				PushChanged();
+			}
+			return;
+		}
+
+		SelectTrack(prevCat, prevTrack, _isPlaying);
 	}
 
-	public void SelectTrack(int index, bool autoPlay = false)
+	public void SelectTrack(int catalogIndex, int trackIndex, bool autoPlay = false)
 	{
-		if (!_audioSource || catalog == null || index < 0 || index >= catalog.tracks.Length) return;
+		if (catalogSet == null || catalogSet.catalogs == null || catalogSet.catalogs.Count == 0) return;
+		if (catalogIndex < 0 || catalogIndex >= catalogSet.catalogs.Count) return;
 
-		// 以前のハンドル解放
+		var cat = GetCatalog(catalogIndex);
+		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return;
+		if (trackIndex < 0 || trackIndex >= cat.tracks.Length) return;
+
 		if (_currentHandle.IsValid())
 			Addressables.Release(_currentHandle);
 
-		_currentIndex = index;
+		_currentCatalogIndex = catalogIndex;
+		_currentIndex = trackIndex;
 
-		var entry = catalog.tracks[index];
+		var entry = cat.tracks[trackIndex];
 		_currentHandle = entry.clip.LoadAssetAsync<AudioClip>();
 		_currentHandle.Completed += op =>
 		{
@@ -156,21 +163,32 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 			{
 				Debug.LogError($"[MusicServiceSO] Failed to load {entry.displayName}");
 			}
-
 			PushChanged();
 		};
 
-		// ロード前でもタイトルは即時反映
+		// ロード前でも状態を即時通知
 		PushChanged();
+	}
+
+	public void SetCatalog(int catalogIndex, bool keepTrackIndex = false, bool autoPlay = false)
+	{
+		if (catalogSet == null || catalogSet.catalogs == null || catalogSet.catalogs.Count == 0) return;
+		catalogIndex = Mathf.Clamp(catalogIndex, 0, catalogSet.catalogs.Count - 1);
+		var cat = GetCatalog(catalogIndex);
+		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return;
+
+		int nextTrack = keepTrackIndex
+			? Mathf.Clamp(_currentIndex, 0, cat.tracks.Length - 1)
+			: 0;
+
+		SelectTrack(catalogIndex, nextTrack, autoPlay);
 	}
 
 	public void CyclePlayMode()
 	{
 		var values = Enum.GetValues(typeof(PlayMode)).Cast<PlayMode>().ToArray();
 		int idx = Array.IndexOf(values, PlayMode);
-		int next = (idx + 1) % values.Length;
-		PlayMode = values[next];
-
+		PlayMode = values[(idx + 1) % values.Length];
 		PlayModeStore.Save(PlayMode);
 		PushChanged();
 	}
@@ -204,7 +222,7 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 
 		// 曲が終わったらモードごとの挙動
 		if (_isPlaying && !_audioSource.isPlaying &&
-				_audioSource.time >= _audioSource.clip.length - 0.05f)
+			_audioSource.time >= _audioSource.clip.length - 0.05f)
 		{
 			HandleTrackFinished();
 		}
@@ -215,32 +233,123 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 		switch (PlayMode)
 		{
 			case PlayMode.RepeatOne:
-				if (_currentIndex >= 0) SelectTrack(_currentIndex, true);
+				if (_currentIndex >= 0) SelectTrack(_currentCatalogIndex, _currentIndex, true);
 				else { _isPlaying = false; PushChanged(); }
 				break;
 
 			case PlayMode.Sequential:
 			default:
-				if (loopPlaylist) Next(true);
-				else { _isPlaying = false; PushChanged(); }
+				// カタログ横断のNext
+				Next(true);
 				break;
 		}
 	}
 
+	// ========= 内部ユーティリティ =========
+
+	private TrackCatalog GetCatalog(int catalogIndex)
+	{
+		if (catalogSet == null || catalogSet.catalogs == null) return null;
+		if (catalogIndex < 0 || catalogIndex >= catalogSet.catalogs.Count) return null;
+		return catalogSet.catalogs[catalogIndex]?.catalog;
+	}
+
+	private string GetCatalogDisplayName(int catalogIndex)
+	{
+		if (catalogSet == null || catalogSet.catalogs == null) return string.Empty;
+		if (catalogIndex < 0 || catalogIndex >= catalogSet.catalogs.Count) return string.Empty;
+
+		var item = catalogSet.catalogs[catalogIndex];
+		return string.IsNullOrEmpty(item?.displayName) ? $"Catalog {catalogIndex}" : item.displayName;
+	}
+
+	// from から dir(±1)方向に、次の「非空」カタログを探す
+	private int FindNextNonEmptyCatalog(int from, int dir)
+	{
+		if (catalogSet == null || catalogSet.catalogs == null || catalogSet.catalogs.Count == 0) return -1;
+		int n = catalogSet.catalogs.Count;
+		for (int step = 1; step <= n; step++)
+		{
+			int idx = (from + dir * step + n) % n;
+			var c = GetCatalog(idx);
+			if (c != null && c.tracks != null && c.tracks.Length > 0) return idx;
+		}
+		return -1;
+	}
+
+	private bool TryGetNextAcross(out int nextCatalog, out int nextTrack)
+	{
+		nextCatalog = _currentCatalogIndex;
+		nextTrack = _currentIndex;
+
+		var cat = GetCatalog(_currentCatalogIndex);
+		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return false;
+
+		// 同一カタログ内で +1
+		if (_currentIndex + 1 < cat.tracks.Length)
+		{
+			nextTrack = _currentIndex + 1;
+			return true;
+		}
+
+		// 末尾 → 次の非空カタログ先頭
+		int idx = FindNextNonEmptyCatalog(_currentCatalogIndex, +1);
+		if (idx >= 0)
+		{
+			nextCatalog = idx;
+			nextTrack = 0;
+			return true;
+		}
+		return false;
+	}
+
+	private bool TryGetPrevAcross(out int prevCatalog, out int prevTrack)
+	{
+		prevCatalog = _currentCatalogIndex;
+		prevTrack = _currentIndex;
+
+		var cat = GetCatalog(_currentCatalogIndex);
+		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return false;
+
+		// 同一カタログ内で -1
+		if (_currentIndex - 1 >= 0)
+		{
+			prevTrack = _currentIndex - 1;
+			return true;
+		}
+
+		// 先頭 → 前の非空カタログ末尾
+		int idx = FindNextNonEmptyCatalog(_currentCatalogIndex, -1);
+		if (idx >= 0)
+		{
+			var c = GetCatalog(idx);
+			int last = Mathf.Max(0, (c?.tracks?.Length ?? 1) - 1);
+			prevCatalog = idx;
+			prevTrack = last;
+			return true;
+		}
+		return false;
+	}
+
 	private void PushChanged()
 	{
-		string title = (catalog && _currentIndex >= 0 && _currentIndex < (catalog?.tracks.Length ?? 0))
-				? catalog.tracks[_currentIndex].displayName
-				: string.Empty;
+		var cat = GetCatalog(_currentCatalogIndex);
+		string title = (cat != null && _currentIndex >= 0 && _currentIndex < (cat.tracks?.Length ?? 0))
+			? cat.tracks[_currentIndex].displayName
+			: string.Empty;
 
-		bool hasAny = catalog && catalog.tracks.Length > 0;
+		bool hasAny = cat != null && cat.tracks != null && cat.tracks.Length > 0;
+		int trackCount = cat?.tracks?.Length ?? 0;
 
 		OnChanged?.Invoke(new MusicSnapshot(
-				_currentIndex,
-				_isPlaying,
-				title,
-				hasAny,
-				PlayMode
+			_currentIndex,
+			_isPlaying,
+			title,
+			hasAny,
+			PlayMode,
+			_currentCatalogIndex,
+			GetCatalogDisplayName(_currentCatalogIndex),
+			trackCount
 		));
 	}
 
@@ -248,16 +357,9 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 	{
 		if (_currentHandle.IsValid())
 			Addressables.Release(_currentHandle);
+
 		_currentIndex = -1;
 		_isPlaying = false;
 		_audioSource = null;
 	}
-
-#if UNITY_EDITOR
-	// ドメインリロード時のリーク対策をしたいなら適宜
-	private void OnDisable()
-	{
-		// Dispose(); // 必要なら有効化
-	}
-#endif
 }

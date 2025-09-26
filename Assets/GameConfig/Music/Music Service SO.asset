@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266668cd5fd141bd96e6a1b3c556e5f, type: 3}
   m_Name: Music Service SO
   m_EditorClassIdentifier: 
-  catalog: {fileID: 11400000, guid: 3ed458d37e3ae470da0fb874a168cb2a, type: 2}
+  catalogSet: {fileID: 11400000, guid: a7e762bca1df74dbbb2b18d9b13c19af, type: 2}
   loopPlaylist: 1
