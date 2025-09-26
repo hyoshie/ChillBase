@@ -42,7 +42,7 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 	public void Initialize(bool autoPlayOnStart)
 	{
 		// 最初の非空カタログに合わせる
-		int first = FindNextNonEmptyCatalog(-1, +1);
+		int first = catalogSet?.FindNextNonEmptyCatalog(-1, +1) ?? -1;
 		if (first >= 0)
 		{
 			_currentCatalogIndex = first;
@@ -77,47 +77,31 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 
 	public void Next(bool autoPlayOverride = false)
 	{
-		if (!TryGetNextAcross(out int nextCat, out int nextTrack))
+		if (!(catalogSet?.TryGetNextAcross(_currentCatalogIndex, _currentIndex, out int nextCat, out int nextTrack) ?? false))
 		{
-			// 全体末尾：loopPlaylist なら先頭へ、なければ停止
 			if (loopPlaylist)
 			{
-				int first = FindNextNonEmptyCatalog(-1, +1);
+				int first = catalogSet.FindNextNonEmptyCatalog(-1, +1);
 				if (first >= 0) SelectTrack(first, 0, autoPlayOverride || _isPlaying);
 				else { _isPlaying = false; PushChanged(); }
 			}
-			else
-			{
-				_isPlaying = false;
-				PushChanged();
-			}
+			else { _isPlaying = false; PushChanged(); }
 			return;
 		}
-
 		SelectTrack(nextCat, nextTrack, autoPlayOverride || _isPlaying);
 	}
 
 	public void Prev()
 	{
-		if (!TryGetPrevAcross(out int prevCat, out int prevTrack))
+		if (!(catalogSet?.TryGetPrevAcross(_currentCatalogIndex, _currentIndex, out int prevCat, out int prevTrack) ?? false))
 		{
-			// 全体先頭：loopPlaylist なら最後へ、なければ停止
-			if (loopPlaylist)
+			if (loopPlaylist && catalogSet.TryGetLastNonEmpty(out int lastCat))
 			{
-				int lastCat = FindNextNonEmptyCatalog(0, -1);
-				if (lastCat >= 0)
-				{
-					var c = GetCatalog(lastCat);
-					int t = Mathf.Max(0, (c?.tracks?.Length ?? 1) - 1);
-					SelectTrack(lastCat, t, _isPlaying);
-				}
-				else { _isPlaying = false; PushChanged(); }
+				var c = catalogSet.GetCatalog(lastCat);
+				int t = Mathf.Max(0, (c?.tracks?.Length ?? 1) - 1);
+				SelectTrack(lastCat, t, _isPlaying);
 			}
-			else
-			{
-				_isPlaying = false;
-				PushChanged();
-			}
+			else { _isPlaying = false; PushChanged(); }
 			return;
 		}
 
@@ -129,7 +113,7 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 		if (catalogSet == null || catalogSet.catalogs == null || catalogSet.catalogs.Count == 0) return;
 		if (catalogIndex < 0 || catalogIndex >= catalogSet.catalogs.Count) return;
 
-		var cat = GetCatalog(catalogIndex);
+		var cat = catalogSet.GetCatalog(catalogIndex);
 		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return;
 		if (trackIndex < 0 || trackIndex >= cat.tracks.Length) return;
 
@@ -174,7 +158,7 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 	{
 		if (catalogSet == null || catalogSet.catalogs == null || catalogSet.catalogs.Count == 0) return;
 		catalogIndex = Mathf.Clamp(catalogIndex, 0, catalogSet.catalogs.Count - 1);
-		var cat = GetCatalog(catalogIndex);
+		var cat = catalogSet.GetCatalog(catalogIndex);
 		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return;
 
 		int nextTrack = keepTrackIndex
@@ -246,94 +230,9 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 	}
 
 	// ========= 内部ユーティリティ =========
-
-	private TrackCatalog GetCatalog(int catalogIndex)
-	{
-		if (catalogSet == null || catalogSet.catalogs == null) return null;
-		if (catalogIndex < 0 || catalogIndex >= catalogSet.catalogs.Count) return null;
-		return catalogSet.catalogs[catalogIndex]?.catalog;
-	}
-
-	private string GetCatalogDisplayName(int catalogIndex)
-	{
-		if (catalogSet == null || catalogSet.catalogs == null) return string.Empty;
-		if (catalogIndex < 0 || catalogIndex >= catalogSet.catalogs.Count) return string.Empty;
-
-		var item = catalogSet.catalogs[catalogIndex];
-		return string.IsNullOrEmpty(item?.displayName) ? $"Catalog {catalogIndex}" : item.displayName;
-	}
-
-	// from から dir(±1)方向に、次の「非空」カタログを探す
-	private int FindNextNonEmptyCatalog(int from, int dir)
-	{
-		if (catalogSet == null || catalogSet.catalogs == null || catalogSet.catalogs.Count == 0) return -1;
-		int n = catalogSet.catalogs.Count;
-		for (int step = 1; step <= n; step++)
-		{
-			int idx = (from + dir * step + n) % n;
-			var c = GetCatalog(idx);
-			if (c != null && c.tracks != null && c.tracks.Length > 0) return idx;
-		}
-		return -1;
-	}
-
-	private bool TryGetNextAcross(out int nextCatalog, out int nextTrack)
-	{
-		nextCatalog = _currentCatalogIndex;
-		nextTrack = _currentIndex;
-
-		var cat = GetCatalog(_currentCatalogIndex);
-		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return false;
-
-		// 同一カタログ内で +1
-		if (_currentIndex + 1 < cat.tracks.Length)
-		{
-			nextTrack = _currentIndex + 1;
-			return true;
-		}
-
-		// 末尾 → 次の非空カタログ先頭
-		int idx = FindNextNonEmptyCatalog(_currentCatalogIndex, +1);
-		if (idx >= 0)
-		{
-			nextCatalog = idx;
-			nextTrack = 0;
-			return true;
-		}
-		return false;
-	}
-
-	private bool TryGetPrevAcross(out int prevCatalog, out int prevTrack)
-	{
-		prevCatalog = _currentCatalogIndex;
-		prevTrack = _currentIndex;
-
-		var cat = GetCatalog(_currentCatalogIndex);
-		if (cat == null || cat.tracks == null || cat.tracks.Length == 0) return false;
-
-		// 同一カタログ内で -1
-		if (_currentIndex - 1 >= 0)
-		{
-			prevTrack = _currentIndex - 1;
-			return true;
-		}
-
-		// 先頭 → 前の非空カタログ末尾
-		int idx = FindNextNonEmptyCatalog(_currentCatalogIndex, -1);
-		if (idx >= 0)
-		{
-			var c = GetCatalog(idx);
-			int last = Mathf.Max(0, (c?.tracks?.Length ?? 1) - 1);
-			prevCatalog = idx;
-			prevTrack = last;
-			return true;
-		}
-		return false;
-	}
-
 	private void PushChanged()
 	{
-		var cat = GetCatalog(_currentCatalogIndex);
+		var cat = catalogSet.GetCatalog(_currentCatalogIndex);
 		string title = (cat != null && _currentIndex >= 0 && _currentIndex < (cat.tracks?.Length ?? 0))
 			? cat.tracks[_currentIndex].displayName
 			: string.Empty;
@@ -348,7 +247,7 @@ public class MusicServiceSO : ScriptableObject, IMusicService
 			hasAny,
 			PlayMode,
 			_currentCatalogIndex,
-			GetCatalogDisplayName(_currentCatalogIndex),
+			catalogSet.GetDisplayName(_currentCatalogIndex),
 			trackCount
 		));
 	}
